@@ -301,15 +301,68 @@ R_{\mathrm{nuc}}
 
 ### Stoner-Wohlfarth Limit
 
-The Stoner-Wohlfarth limit is recovered for $\nu=0$, where the magnetization is
-spatially uniform and only the angular degree of freedom remains. In the
-minimal model this is the relevant regime below the vortex-nucleation threshold,
-roughly for radii $R<R_{\mathrm{nuc}}$, where the uniform state remains locally
-stable against the hyperbolic-vortex mode.
+The Stoner-Wohlfarth limit is recovered by restricting the reduced Hamiltonian
+to the uniform state $\nu=0$. In this limit
 
-For a single-domain particle it is convenient to write the angular energy in
-terms of the magnetization angle $\alpha$ relative to the easy axis and reduced
-field components parallel and perpendicular to the easy axis:
+```math
+g_{\mathrm{ex}}(0)=0,\qquad
+g_u^z(0)=1,\qquad
+g_u^x(0)=0,\qquad
+g_z^z(0)=1,
+```
+
+and the demagnetizing contribution is an angularly constant sphere term. The
+two reduced Hamiltonians therefore give the same angular Stoner-Wohlfarth
+energy:
+
+```math
+\mathcal H_{\mathrm{SW}}(\tau,B,\beta)
+=
+-
+\frac{K_uR^2}{A}\cos^2(\tau-\beta)
+-
+\frac{M_sBR^2}{A}\cos\tau
++
+C_0.
+```
+
+Here $C_0$ is independent of $\tau$.
+
+Here $\tau$ is already the magnetization angle relative to the applied-field
+axis. The angle relative to the easy axis is therefore only a shifted variable,
+
+```math
+\alpha=\tau-\beta.
+```
+
+Using
+
+```math
+B_K=\frac{2K_u}{M_s},
+\qquad
+b=\frac{B}{B_K},
+```
+
+the same angular energy can be written, up to an irrelevant additive constant,
+as
+
+```math
+e_{\mathrm{SW}}(\alpha)
+=
+\sin^2\alpha
+-
+2b\cos(\alpha+\beta).
+```
+
+Thus, in the notation of this repository, one can work directly with $\tau$,
+while $\alpha$ is only the conventional Stoner-Wohlfarth angle measured from
+the easy axis. In the minimal model this uniform limit is the relevant regime
+below the vortex-nucleation threshold, roughly for radii $R<R_{\mathrm{nuc}}$,
+where the uniform state remains locally stable against the hyperbolic-vortex
+mode.
+
+For the standard astroid derivation one rewrites the Zeeman part in terms of
+reduced field components parallel and perpendicular to the easy axis:
 
 ```math
 e(\alpha)
@@ -352,13 +405,7 @@ in the two-dimensional field plane. A hysteresis simulation at a fixed field
 angle $\beta$ corresponds to moving along a straight line through this plane;
 the switching field is the point where this line first intersects the astroid.
 
-For the Stoner-Wohlfarth limit with
-
-```math
-B_K=\frac{2K_u}{M_s},
-```
-
-the astroid switching field is
+The astroid switching field is
 
 ```math
 B_{\mathrm{sw}}(\beta)
