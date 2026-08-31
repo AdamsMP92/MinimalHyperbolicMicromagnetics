@@ -307,6 +307,51 @@ minimal model this is the relevant regime below the vortex-nucleation threshold,
 roughly for radii $R<R_{\mathrm{nuc}}$, where the uniform state remains locally
 stable against the hyperbolic-vortex mode.
 
+For a single-domain particle it is convenient to write the angular energy in
+terms of the magnetization angle $\alpha$ relative to the easy axis and reduced
+field components parallel and perpendicular to the easy axis:
+
+```math
+e(\alpha)
+=
+\sin^2\alpha
+-
+2h_\parallel\cos\alpha
+-
+2h_\perp\sin\alpha,
+\qquad
+h_i=\frac{B_i}{B_K}.
+```
+
+The metastable magnetization directions are local minima of this one-dimensional
+energy. The switching boundary is reached when a minimum and a saddle merge.
+Therefore the astroid follows from solving the two conditions
+
+```math
+\frac{\partial e}{\partial\alpha}=0,
+\qquad
+\frac{\partial^2 e}{\partial\alpha^2}=0.
+```
+
+Eliminating $\alpha$ gives the Stoner-Wohlfarth astroid in reduced field space:
+
+```math
+h_\parallel(\alpha)=-\cos^3\alpha,
+\qquad
+h_\perp(\alpha)=\sin^3\alpha,
+```
+
+with
+
+```math
+|h_\parallel|^{2/3}+|h_\perp|^{2/3}=1.
+```
+
+Thus the astroid is not itself a hysteresis loop. It is the stability boundary
+in the two-dimensional field plane. A hysteresis simulation at a fixed field
+angle $\beta$ corresponds to moving along a straight line through this plane;
+the switching field is the point where this line first intersects the astroid.
+
 For the Stoner-Wohlfarth limit with
 
 ```math
@@ -326,6 +371,11 @@ B_K
 \right)^{-3/2}.
 ```
 
+This is the field magnitude at which the metastable branch loses stability.
+The coercive field used in a hysteresis loop is instead the field where the
+magnetization projected onto the field axis crosses zero. For field angles
+below $45^\circ$, this happens at the switching event. For larger angles, the
+projection can cross zero before the actual switching instability is reached.
 The projected coercive field is
 
 ```math
@@ -337,20 +387,6 @@ B_{\mathrm{sw}}(\beta),
 \frac{B_K}{2}|\sin(2\beta)|,
 & \pi/4 < \beta \le \pi/2.
 \end{cases}
-```
-
-The reduced Stoner-Wohlfarth astroid is parametrized as
-
-```math
-h_\parallel(\psi)=-\cos^3\psi,
-\qquad
-h_\perp(\psi)=\sin^3\psi,
-```
-
-and satisfies
-
-```math
-|h_\parallel|^{2/3}+|h_\perp|^{2/3}=1.
 ```
 
 ## Installation
