@@ -168,8 +168,11 @@ The magnetization projected along the field axis is
 ### Vortex Nucleation
 
 The nucleation field follows from the local stability of the saturated state.
-For $\beta=0$ and $\tau=0$, the uniform state corresponds to $\nu=0$. Expanding
-the reduced profiles around $\nu=0$ gives
+For $\beta=0$ and $\tau=0$, the uniform state corresponds to $\nu=0$. At this
+point the additional transverse anisotropy term of $\mathcal H'$ is multiplied
+by $\sin^2(\tau-\beta)=0$, so the same nucleation condition is obtained from
+both $\mathcal H'$ and $\mathcal H''$. Expanding the reduced profiles around
+$\nu=0$ gives
 
 ```math
 g_{\mathrm{ex}}(\nu)=2\nu^2+\mathcal O(\nu^4),
@@ -187,6 +190,10 @@ Inserted into the minimal Hamiltonian, this gives the second variation
 
 ```math
 \left.
+\frac{\partial^2\mathcal H'}{\partial\nu^2}
+\right|_{\nu=0,\tau=0,\beta=0}
+=
+\left.
 \frac{\partial^2\mathcal H''}{\partial\nu^2}
 \right|_{\nu=0,\tau=0,\beta=0}
 =
@@ -200,8 +207,7 @@ Inserted into the minimal Hamiltonian, this gives the second variation
 ```
 
 The vortex nucleation field is obtained by setting this curvature to zero.
-The exact small-$\nu$ vortex-nucleation field of the reduced $\mathcal H''$
-model is
+The exact small-$\nu$ vortex-nucleation field is therefore
 
 ```math
 B_{\mathrm{nuc}}
