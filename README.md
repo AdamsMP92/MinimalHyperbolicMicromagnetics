@@ -34,6 +34,12 @@ M_s\int_V \mathbf B_{\mathrm{ext}}\cdot \mathbf m\,dV
 \frac{1}{2}\int_V \mathbf M\cdot\mathbf B_{\mathrm d}\,dV .
 ```
 
+Here $\mathbf m$ is the normalized magnetization direction,
+
+```math
+\mathbf m=\frac{\mathbf M}{M_s}.
+```
+
 The local hyperbolic-vortex Ansatz is
 
 ```math
