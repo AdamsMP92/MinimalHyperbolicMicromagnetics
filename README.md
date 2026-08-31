@@ -62,6 +62,34 @@ with polar rotation angle $\tau$, azimuthal rotation angle $\omega$, and
 \mathbf R(\tau,\omega)=\mathbf R_z(\omega)\mathbf R_y(\tau).
 ```
 
+The reduced Hamiltonians are dimensionless energies obtained by dividing the
+physical energy defined above by the exchange scale $(4\pi/3) A R$:
+
+```math
+\mathcal H_{\mathrm{red}}
+=
+\frac{\mathcal H}{(4\pi/3) A R}.
+```
+
+With the sphere volume
+
+```math
+V_s=\frac{4\pi}{3}R^3,
+```
+
+the anisotropy, Zeeman, and magnetostatic prefactors become
+
+```math
+\frac{K_uV_s}{(4\pi/3)AR}=\frac{K_uR^2}{A},
+\qquad
+\frac{M_sBV_s}{(4\pi/3)AR}=\frac{M_sBR^2}{A},
+\qquad
+\frac{\mu_0M_s^2V_s}{(4\pi/3)AR}=\frac{\mu_0M_s^2R^2}{A}.
+```
+
+This is the normalization used in the code and yields the compact prefactors
+shown in the reduced Hamiltonians:
+
 For a uniaxial anisotropy direction tilted by an angle $\beta$ relative to the
 field axis, the reduced Hamiltonian used by the package is
 
