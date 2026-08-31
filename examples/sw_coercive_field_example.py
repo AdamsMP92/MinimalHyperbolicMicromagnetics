@@ -1,4 +1,4 @@
-"""Compare Stoner-Wohlfarth coercive fields from hysteresis with theory.
+"""Example comparing Stoner-Wohlfarth coercive fields with theory.
 
 The coercive field used here is the zero crossing of the magnetization
 projected onto the field direction. This is distinct from the switching field

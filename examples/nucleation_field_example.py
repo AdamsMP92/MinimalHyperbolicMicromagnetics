@@ -1,4 +1,4 @@
-"""Compare analytic vortex-nucleation fields with field-following hysteresis.
+"""Example comparing analytic vortex-nucleation fields with hysteresis.
 
 The analytic formula follows from the small-nu stability of the uniform state.
 The numerical estimate below uses the same reduced Hamiltonian, follows the

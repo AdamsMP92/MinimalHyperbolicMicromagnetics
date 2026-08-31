@@ -1,4 +1,4 @@
-"""Example script for computing profiles and a hysteresis loop.
+"""Example for computing profiles and a hysteresis loop.
 
 The script is intentionally written as a flat file so it can be started with
 VS Code's "Run Python File" button. All parameters that users are likely to

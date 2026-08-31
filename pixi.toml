@@ -6,10 +6,10 @@ platforms = ["osx-arm64"]
 version = "0.1.0"
 
 [tasks]
-compute = "python src/hysteresis_example.py"
-nucleation-field = "python src/nucleation_field_example.py"
-sw-astroide-example = "python src/sw_astroide_example.py"
-coercive-field = "python src/sw_coercive_field_example.py"
+compute = "python examples/hysteresis_example.py"
+nucleation-field = "python examples/nucleation_field_example.py"
+sw-astroide-example = "python examples/sw_astroide_example.py"
+coercive-field = "python examples/sw_coercive_field_example.py"
 test = "pytest test"
 sw-astroid = "python test/test_sw_astroid_minimal_model.py"
 

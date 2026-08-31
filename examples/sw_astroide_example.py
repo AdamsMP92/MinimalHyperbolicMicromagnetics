@@ -1,4 +1,4 @@
-"""Compare the Stoner-Wohlfarth astroid with hysteresis switching fields.
+"""Example comparing the Stoner-Wohlfarth astroid with switching fields.
 
 The reduced model is evaluated in the Stoner-Wohlfarth limit by setting
 stoner_wohlfarth=True. For each field angle beta, the script follows the
