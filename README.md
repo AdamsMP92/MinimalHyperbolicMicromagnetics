@@ -453,7 +453,7 @@ B_c(\beta)
 \begin{cases}
 B_{\mathrm{sw}}(\beta),
 & 0\le \beta \le \pi/4,\\
-\frac{B_K}{2}|\sin(2\beta)|,
+\frac{B_K}{2}\sin(2\beta),
 & \pi/4 < \beta \le \pi/2.
 \end{cases}
 ```
