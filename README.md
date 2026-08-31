@@ -312,8 +312,8 @@ g_z^z(0)=1,
 ```
 
 and the demagnetizing contribution is an angularly constant sphere term. The
-two reduced Hamiltonians therefore give the same angular Stoner-Wohlfarth
-energy:
+two reduced Hamiltonians $\mathcal H'$ and $\mathcal H''$ therefore give the
+same angular Stoner-Wohlfarth energy:
 
 ```math
 \mathcal H_{\mathrm{SW}}(\tau,B,\beta)
@@ -343,8 +343,8 @@ B_K=\frac{2K_u}{M_s},
 b=\frac{B}{B_K},
 ```
 
-the same angular energy can be written, up to an irrelevant additive constant,
-as
+the same angular energy can be rescaled by the anisotropy prefactor
+$K_uR^2/A$ and written, up to an irrelevant additive constant, as
 
 ```math
 e_{\mathrm{SW}}(\alpha)
@@ -352,6 +352,16 @@ e_{\mathrm{SW}}(\alpha)
 \sin^2\alpha
 -
 2b\cos(\alpha+\beta).
+```
+
+This uses
+
+```math
+-\cos^2\alpha
+=
+\sin^2\alpha-1,
+\qquad
+\tau=\alpha+\beta.
 ```
 
 Thus, in the notation of this repository, one can work directly with $\tau$,
