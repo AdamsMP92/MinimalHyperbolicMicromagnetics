@@ -364,6 +364,17 @@ This uses
 \tau=\alpha+\beta.
 ```
 
+The Zeeman part can then be decomposed with
+
+```math
+\cos(\alpha+\beta)
+=
+\cos\alpha\cos\beta-\sin\alpha\sin\beta,
+```
+
+so that a field applied at angle $\beta$ corresponds to reduced components
+$h_\parallel=b\cos\beta$ and $h_\perp=-b\sin\beta$ in the easy-axis frame.
+
 Thus, in the notation of this repository, one can work directly with $\tau$,
 while $\alpha$ is only the conventional Stoner-Wohlfarth angle measured from
 the easy axis. In the minimal model this uniform limit is the relevant regime
