@@ -128,6 +128,13 @@ g_u^z(\nu)\cos^2(\tau-\beta)
 
 ## Profile Functions
 
+The profile functions are the reduced dimensionless volume integrals obtained
+after inserting the hyperbolic-vortex Ansatz, including the rotation matrix,
+into the original Hamiltonian. They collect the dependence on the vortex
+parameter $\nu$, while the material parameters, particle radius, applied field,
+and orientation angle remain as explicit prefactors in the reduced
+Hamiltonians.
+
 The optimized dimensionless profile functions are
 
 ```math
