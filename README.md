@@ -167,6 +167,39 @@ The magnetization projected along the field axis is
 
 ### Vortex Nucleation
 
+The nucleation field follows from the local stability of the saturated state.
+For $\beta=0$ and $\tau=0$, the uniform state corresponds to $\nu=0$. Expanding
+the reduced profiles around $\nu=0$ gives
+
+```math
+g_{\mathrm{ex}}(\nu)=2\nu^2+\mathcal O(\nu^4),
+\qquad
+g_u^z(\nu)=1-\frac{2}{5}\nu^2+\mathcal O(\nu^4),
+```
+
+```math
+g_z^z(\nu)=1-\frac{1}{5}\nu^2+\mathcal O(\nu^4),
+\qquad
+g_{\mathrm{dem}}(\nu)=\frac{1}{3}+\frac{1}{15}\nu^2+\mathcal O(\nu^4).
+```
+
+Inserted into the minimal Hamiltonian, this gives the second variation
+
+```math
+\left.
+\frac{\partial^2\mathcal H''}{\partial\nu^2}
+\right|_{\nu=0,\tau=0,\beta=0}
+=
+4
++
+\frac{4}{5}\frac{K_uR^2}{A}
++
+\frac{2}{5}\frac{M_sBR^2}{A}
+-
+\frac{2}{15}\frac{\mu_0M_s^2R^2}{A}.
+```
+
+The vortex nucleation field is obtained by setting this curvature to zero.
 The exact small-$\nu$ vortex-nucleation field of the reduced $\mathcal H''$
 model is
 
@@ -213,6 +246,12 @@ R_{\mathrm{nuc}}
 ```
 
 ### Stoner-Wohlfarth Limit
+
+The Stoner-Wohlfarth limit is recovered for $\nu=0$, where the magnetization is
+spatially uniform and only the angular degree of freedom remains. In the
+minimal model this is the relevant regime below the vortex-nucleation threshold,
+roughly for radii $R<R_{\mathrm{nuc}}$, where the uniform state remains locally
+stable against the hyperbolic-vortex mode.
 
 For the Stoner-Wohlfarth limit with
 
