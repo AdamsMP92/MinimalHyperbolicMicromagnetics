@@ -149,6 +149,9 @@ $g_u^x$ to the longitudinal and transverse anisotropy contributions, $g_z^z$ to
 the Zeeman term and average projected magnetization, and $g_{\mathrm{dem}}$ to
 the magnetostatic self-energy.
 
+A more detailed derivation is provided in
+[docs/profile_derivation.md](docs/profile_derivation.md).
+
 The optimized dimensionless profile functions are
 
 ```math
