@@ -17,6 +17,8 @@ analytic checks for the vortex-nucleation field and the Stoner-Wohlfarth limit.
 - Published article: [https://doi.org/10.1103/8rkf-j2kn](https://doi.org/10.1103/8rkf-j2kn)
 - arXiv preprint: [https://arxiv.org/abs/2601.17176](https://arxiv.org/abs/2601.17176)
 - Supplementary Zenodo repository: [https://doi.org/10.5281/zenodo.21481863](https://doi.org/10.5281/zenodo.21481863)
+- Stoner-Wohlfarth model review: [https://doi.org/10.1088/0143-0807/29/3/008](https://doi.org/10.1088/0143-0807/29/3/008)
+- Stoner-Wohlfarth static properties review: [https://doi.org/10.1016/j.physb.2008.05.031](https://doi.org/10.1016/j.physb.2008.05.031)
 
 ## Model
 
