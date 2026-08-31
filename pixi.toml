@@ -1,0 +1,28 @@
+[workspace]
+authors = ["Michael P. Adams"]
+channels = ["conda-forge"]
+name = "minimal-hyperbolic-micromagnetics"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+compute = "python src/hysteresis_example.py"
+nucleation-field = "python src/nucleation_field_example.py"
+sw-astroide-example = "python src/sw_astroide_example.py"
+coercive-field = "python src/sw_coercive_field_example.py"
+test = "pytest test"
+sw-astroid = "python test/test_sw_astroid_minimal_model.py"
+
+[dependencies]
+hatchling = ">=1.27,<2"
+matplotlib = ">=3.10,<4"
+numpy = ">=2.3,<3"
+pandas = ">=2.3,<3"
+pillow = ">=11,<13"
+python = ">=3.12,<3.13"
+pytest = ">=8.4,<9"
+pyvista = ">=0.46,<0.47"
+
+[pypi-dependencies]
+minimal-hyperbolic-micromagnetics = { path = ".", editable = true }
+paperfig = { git = "https://github.com/AdamsMP92/paperfig.git" }

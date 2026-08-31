@@ -1,1 +1,342 @@
 # MinimalHyperbolicMicromagnetics
+
+Reduced hyperbolic-vortex micromagnetics for spherical magnetic nanoparticles.
+
+This repository provides optimized profile functions, analytic reference
+formulas, and a field-following hysteresis evaluator for the minimal
+hyperbolic-vortex model. It is intended as a compact Python package that can be
+used from scripts, notebooks, tests, or repository examples.
+
+The code is related to the article *Minimal model for vortex nucleation and
+reversal in spherical magnetic nanoparticles*. This version focuses on a faster
+and more precise implementation of the reduced energy profiles and on explicit
+analytic checks for the vortex-nucleation field and the Stoner-Wohlfarth limit.
+
+## Model
+
+The micromagnetic Hamiltonian is
+
+$$
+\mathcal{H}(\mathbf{m})
+=
+A\int_V (\nabla \mathbf m)^2\,dV
+-
+K_u\int_V (\mathbf m\cdot \mathbf e_u)^2\,dV
+-
+M_s\int_V \mathbf B_{\mathrm{ext}}\cdot \mathbf m\,dV
+-
+\frac{1}{2}\int_V \mathbf M\cdot\mathbf B_{\mathrm d}\,dV .
+$$
+
+The local hyperbolic-vortex Ansatz is
+
+$$
+\mathbf{M}'(\mathbf{r}')
+=
+M_s
+\left[
+\tanh\!\left(\nu\rho'/R\right)\mathbf e_\phi'
++
+\operatorname{sech}\!\left(\nu\rho'/R\right)\mathbf e_z'
+\right].
+$$
+
+The global vortex is obtained by rotation,
+
+$$
+\mathbf{M}(\mathbf r)
+=
+\mathbf R(\tau,\omega)
+\mathbf M'\!\left(\mathbf R^T(\tau,\omega)\mathbf r\right),
+$$
+
+with polar rotation angle $\tau$, azimuthal rotation angle $\omega$, and
+
+$$
+\mathbf R(\tau,\omega)=\mathbf R_z(\omega)\mathbf R_y(\tau).
+$$
+
+For a uniaxial anisotropy direction tilted by an angle $\beta$ relative to the
+field axis, the reduced Hamiltonian used by the package is
+
+$$
+\mathcal H'(\nu,\tau,B,\beta)
+=
+g_{\mathrm{ex}}(\nu)
+-
+\frac{K_uR^2}{A}
+\left[
+g_u^z(\nu)\cos^2(\tau-\beta)
++
+g_u^x(\nu)\sin^2(\tau-\beta)
+\right]
+-
+\frac{M_sR^2B}{A}g_z^z(\nu)\cos\tau
+-
+\frac{\mu_0M_s^2R^2}{A}g_{\mathrm{dem}}(\nu).
+$$
+
+The minimal form used in the article is recovered by omitting the transverse
+anisotropy profile, which in the code corresponds to `gux_factor=0`:
+
+$$
+\mathcal H''(\nu,\tau,B,\beta)
+=
+g_{\mathrm{ex}}(\nu)
+-
+\frac{K_uR^2}{A}
+g_u^z(\nu)\cos^2(\tau-\beta)
+-
+\frac{M_sR^2B}{A}g_z^z(\nu)\cos\tau
+-
+\frac{\mu_0M_s^2R^2}{A}g_{\mathrm{dem}}(\nu).
+$$
+
+## Profile Functions
+
+The optimized dimensionless profile functions are
+
+$$
+g_u^z(\nu)
+=
+3\int_0^1
+x\sqrt{1-x^2}\,
+\operatorname{sech}^2(\nu x)\,dx,
+$$
+
+$$
+g_z^z(\nu)
+=
+3\int_0^1
+x\sqrt{1-x^2}\,
+\operatorname{sech}(\nu x)\,dx,
+$$
+
+$$
+g_u^x(\nu)
+=
+4\int_0^1
+x\sqrt{1-x^2}\,
+\tanh^2(\nu x)\,dx
+=
+\frac{4}{3}\left[1-g_u^z(\nu)\right],
+$$
+
+$$
+g_{\mathrm{ex}}(\nu)
+=
+3\int_0^1\sqrt{1-x^2}
+\left[
+\nu^2x\,\operatorname{sech}^2(\nu x)
++
+\frac{\tanh^2(\nu x)}{x}
+\right]dx.
+$$
+
+The positive demagnetizing-energy profile entering the reduced Hamiltonian is
+computed from the spherical-harmonic form
+
+$$
+g_{\mathrm{dem}}(\nu)
+=
+\frac{1}{2}
+-
+\frac{3}{2}
+\sum_{\substack{\ell=1\\ \ell\ \mathrm{odd}}}^{\infty}
+\left[
+\int_0^1
+x\,\operatorname{sech}(\nu x)\,
+P_\ell\!\left(\sqrt{1-x^2}\right)
+\,dx
+\right]^2 .
+$$
+
+The magnetization projected along the field axis is
+
+$$
+\langle m_z\rangle = g_z^z(\nu)\cos\tau .
+$$
+
+## Analytic Formulas
+
+The exact small-$\nu$ vortex-nucleation field of the reduced $\mathcal H''$
+model is
+
+$$
+B_{\mathrm{nuc}}
+=
+\frac{1}{3}\mu_0M_s
+-
+\frac{2K_u}{M_s}
+-
+\frac{10A}{M_sR^2}.
+$$
+
+The exchange length is
+
+$$
+\ell_{\mathrm{ex}}
+=
+\sqrt{\frac{2A}{\mu_0M_s^2}}.
+$$
+
+The anisotropy for which $B_{\mathrm{nuc}}=0$ is
+
+$$
+K_u
+=
+\frac{1}{6}\mu_0M_s^2
+\left(
+1-15\frac{\ell_{\mathrm{ex}}^2}{R^2}
+\right),
+$$
+
+and the corresponding critical vortex-nucleation radius is
+
+$$
+R_{\mathrm{nuc}}
+=
+\sqrt{15}\,\ell_{\mathrm{ex}}
+\left[
+1
+-
+6\frac{K_u}{\mu_0M_s^2}
+\right]^{-1/2}.
+$$
+
+For the Stoner-Wohlfarth limit with
+
+$$
+B_K=\frac{2K_u}{M_s},
+$$
+
+the astroid switching field is
+
+$$
+B_{\mathrm{sw}}(\beta)
+=
+B_K
+\left(
+|\sin\beta|^{2/3}
++
+|\cos\beta|^{2/3}
+\right)^{-3/2}.
+$$
+
+The projected coercive field is
+
+$$
+B_c(\beta)
+=
+\begin{cases}
+B_{\mathrm{sw}}(\beta),
+& 0\le \beta \le \pi/4,\\
+\frac{B_K}{2}|\sin(2\beta)|,
+& \pi/4 < \beta \le \pi/2.
+\end{cases}
+$$
+
+The reduced Stoner-Wohlfarth astroid is parametrized as
+
+$$
+h_\parallel(\psi)=-\cos^3\psi,
+\qquad
+h_\perp(\psi)=\sin^3\psi,
+$$
+
+and satisfies
+
+$$
+|h_\parallel|^{2/3}+|h_\perp|^{2/3}=1.
+$$
+
+## Installation
+
+With Pixi:
+
+```bash
+pixi install
+pixi run test
+```
+
+For an editable Python install:
+
+```bash
+python -m pip install -e .
+```
+
+## Basic Use
+
+```python
+from minimal_hyperbolic_micromagnetics import (
+    HysteresisSettings,
+    ModelParameters,
+    ProfileComputation,
+    compute_profiles,
+    run_hysteresis,
+)
+
+profiles = compute_profiles(ProfileComputation(n_nu=2000, nu_max=20.0))
+
+params = ModelParameters(
+    Ku=4.8e4,
+    Ms=1.7e6,
+    A=1e-11,
+    R=20e-9,
+    beta_deg=0.0,
+    gux_factor=0.0,
+)
+
+settings = HysteresisSettings(Bmax=1.0, n_half=250)
+result = run_hysteresis(params, profiles, settings=settings)
+```
+
+The returned `HysteresisResult` contains the applied field, average projected
+magnetization, selected vortex parameter, angular coordinate, reduced energy,
+and optionally a runtime when using `compute_and_store_hysteresis`:
+
+```python
+result.B_T
+result.mz_avg
+result.nu_min
+result.tau_rad
+result.energy
+result.elapsed_s
+```
+
+The closed formulas are available through:
+
+```python
+from minimal_hyperbolic_micromagnetics import (
+    exchange_length,
+    vortex_nucleation_field,
+    critical_anisotropy_for_zero_nucleation_field,
+    vortex_nucleation_radius,
+    stoner_wohlfarth_astroid,
+    stoner_wohlfarth_switching_field,
+    stoner_wohlfarth_coercive_field,
+)
+```
+
+## Examples
+
+The example scripts can be run with:
+
+```bash
+pixi run compute
+pixi run nucleation-field
+pixi run sw-astroide-example
+pixi run coercive-field
+```
+
+They generate CSV and PNG output in separate ignored output folders.
+
+## Physics Checks
+
+The package includes focused tests for:
+
+- the uniform-profile limit,
+- the optimized identity `g_u^x = 4/3 (1 - g_u^z)`,
+- the analytic vortex-nucleation formulas,
+- the Stoner-Wohlfarth astroid,
+- the distinction between switching field and projected coercive field.

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "minimal-hyperbolic-micromagnetics"
+version = "0.1.0"
+description = "Reduced hyperbolic-vortex micromagnetic profiles and hysteresis for spherical nanoparticles."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Michael P. Adams" },
+]
+dependencies = [
+  "numpy",
+  "pandas",
+]
+
+[project.optional-dependencies]
+plot = [
+  "matplotlib",
+  "paperfig @ git+https://github.com/AdamsMP92/paperfig.git",
+]
+test = [
+  "pytest",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/minimal_hyperbolic_micromagnetics"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
