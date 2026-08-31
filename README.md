@@ -129,11 +129,16 @@ g_u^z(\nu)\cos^2(\tau-\beta)
 ## Profile Functions
 
 The profile functions are the reduced dimensionless volume integrals obtained
-after inserting the hyperbolic-vortex Ansatz, including the rotation matrix,
-into the original Hamiltonian. They collect the dependence on the vortex
-parameter $\nu$, while the material parameters, particle radius, applied field,
-and orientation angle remain as explicit prefactors in the reduced
-Hamiltonians.
+after inserting the local hyperbolic-vortex Ansatz $\mathbf M'(\mathbf r')$,
+the rotation matrix $\mathbf R(\tau,\omega)$, and therefore the global
+magnetization field $\mathbf M(\mathbf r)$ into the original Hamiltonian
+$\mathcal H(\mathbf m)$. They collect the dependence on the vortex parameter
+$\nu$, while the material parameters, particle radius, applied field, and
+orientation angle remain as explicit prefactors in the reduced Hamiltonians. In
+this notation, $g_{\mathrm{ex}}$ belongs to the exchange energy, $g_u^z$ and
+$g_u^x$ to the longitudinal and transverse anisotropy contributions, $g_z^z$ to
+the Zeeman term and average projected magnetization, and $g_{\mathrm{dem}}$ to
+the magnetostatic self-energy.
 
 The optimized dimensionless profile functions are
 
