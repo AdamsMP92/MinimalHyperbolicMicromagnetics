@@ -12,6 +12,12 @@ reversal in spherical magnetic nanoparticles*. This version focuses on a faster
 and more precise implementation of the reduced energy profiles and on explicit
 analytic checks for the vortex-nucleation field and the Stoner-Wohlfarth limit.
 
+## References
+
+- Published article: [https://doi.org/10.1103/8rkf-j2kn](https://doi.org/10.1103/8rkf-j2kn)
+- arXiv preprint: [https://arxiv.org/abs/2601.17176](https://arxiv.org/abs/2601.17176)
+- Supplementary Zenodo repository: [https://doi.org/10.5281/zenodo.21481863](https://doi.org/10.5281/zenodo.21481863)
+
 ## Model
 
 The micromagnetic Hamiltonian is
@@ -37,7 +43,7 @@ M_s
 \left[
 \tanh\!\left(\nu\rho'/R\right)\mathbf e_\phi'
 +
-\operatorname{sech}\!\left(\nu\rho'/R\right)\mathbf e_z'
+\mathrm{sech}\!\left(\nu\rho'/R\right)\mathbf e_z'
 \right].
 ```
 
@@ -101,7 +107,7 @@ g_u^z(\nu)
 =
 3\int_0^1
 x\sqrt{1-x^2}\,
-\operatorname{sech}^2(\nu x)\,dx,
+\mathrm{sech}^2(\nu x)\,dx,
 ```
 
 ```math
@@ -109,7 +115,7 @@ g_z^z(\nu)
 =
 3\int_0^1
 x\sqrt{1-x^2}\,
-\operatorname{sech}(\nu x)\,dx,
+\mathrm{sech}(\nu x)\,dx,
 ```
 
 ```math
@@ -127,7 +133,7 @@ g_{\mathrm{ex}}(\nu)
 =
 3\int_0^1\sqrt{1-x^2}
 \left[
-\nu^2x\,\operatorname{sech}^2(\nu x)
+\nu^2x\,\mathrm{sech}^2(\nu x)
 +
 \frac{\tanh^2(\nu x)}{x}
 \right]dx.
@@ -145,7 +151,7 @@ g_{\mathrm{dem}}(\nu)
 \sum_{\substack{\ell=1\\ \ell\ \mathrm{odd}}}^{\infty}
 \left[
 \int_0^1
-x\,\operatorname{sech}(\nu x)\,
+x\,\mathrm{sech}(\nu x)\,
 P_\ell\!\left(\sqrt{1-x^2}\right)
 \,dx
 \right]^2 .
@@ -158,6 +164,8 @@ The magnetization projected along the field axis is
 ```
 
 ## Analytic Formulas
+
+### Vortex Nucleation
 
 The exact small-$\nu$ vortex-nucleation field of the reduced $\mathcal H''$
 model is
@@ -203,6 +211,8 @@ R_{\mathrm{nuc}}
 6\frac{K_u}{\mu_0M_s^2}
 \right]^{-1/2}.
 ```
+
+### Stoner-Wohlfarth Limit
 
 For the Stoner-Wohlfarth limit with
 
