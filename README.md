@@ -16,7 +16,7 @@ analytic checks for the vortex-nucleation field and the Stoner-Wohlfarth limit.
 
 The micromagnetic Hamiltonian is
 
-$$
+```math
 \mathcal{H}(\mathbf{m})
 =
 A\int_V (\nabla \mathbf m)^2\,dV
@@ -26,11 +26,11 @@ K_u\int_V (\mathbf m\cdot \mathbf e_u)^2\,dV
 M_s\int_V \mathbf B_{\mathrm{ext}}\cdot \mathbf m\,dV
 -
 \frac{1}{2}\int_V \mathbf M\cdot\mathbf B_{\mathrm d}\,dV .
-$$
+```
 
 The local hyperbolic-vortex Ansatz is
 
-$$
+```math
 \mathbf{M}'(\mathbf{r}')
 =
 M_s
@@ -39,27 +39,27 @@ M_s
 +
 \operatorname{sech}\!\left(\nu\rho'/R\right)\mathbf e_z'
 \right].
-$$
+```
 
 The global vortex is obtained by rotation,
 
-$$
+```math
 \mathbf{M}(\mathbf r)
 =
 \mathbf R(\tau,\omega)
 \mathbf M'\!\left(\mathbf R^T(\tau,\omega)\mathbf r\right),
-$$
+```
 
 with polar rotation angle $\tau$, azimuthal rotation angle $\omega$, and
 
-$$
+```math
 \mathbf R(\tau,\omega)=\mathbf R_z(\omega)\mathbf R_y(\tau).
-$$
+```
 
 For a uniaxial anisotropy direction tilted by an angle $\beta$ relative to the
 field axis, the reduced Hamiltonian used by the package is
 
-$$
+```math
 \mathcal H'(\nu,\tau,B,\beta)
 =
 g_{\mathrm{ex}}(\nu)
@@ -74,12 +74,12 @@ g_u^x(\nu)\sin^2(\tau-\beta)
 \frac{M_sR^2B}{A}g_z^z(\nu)\cos\tau
 -
 \frac{\mu_0M_s^2R^2}{A}g_{\mathrm{dem}}(\nu).
-$$
+```
 
 The minimal form used in the article is recovered by omitting the transverse
 anisotropy profile, which in the code corresponds to `gux_factor=0`:
 
-$$
+```math
 \mathcal H''(\nu,\tau,B,\beta)
 =
 g_{\mathrm{ex}}(\nu)
@@ -90,29 +90,29 @@ g_u^z(\nu)\cos^2(\tau-\beta)
 \frac{M_sR^2B}{A}g_z^z(\nu)\cos\tau
 -
 \frac{\mu_0M_s^2R^2}{A}g_{\mathrm{dem}}(\nu).
-$$
+```
 
 ## Profile Functions
 
 The optimized dimensionless profile functions are
 
-$$
+```math
 g_u^z(\nu)
 =
 3\int_0^1
 x\sqrt{1-x^2}\,
 \operatorname{sech}^2(\nu x)\,dx,
-$$
+```
 
-$$
+```math
 g_z^z(\nu)
 =
 3\int_0^1
 x\sqrt{1-x^2}\,
 \operatorname{sech}(\nu x)\,dx,
-$$
+```
 
-$$
+```math
 g_u^x(\nu)
 =
 4\int_0^1
@@ -120,9 +120,9 @@ x\sqrt{1-x^2}\,
 \tanh^2(\nu x)\,dx
 =
 \frac{4}{3}\left[1-g_u^z(\nu)\right],
-$$
+```
 
-$$
+```math
 g_{\mathrm{ex}}(\nu)
 =
 3\int_0^1\sqrt{1-x^2}
@@ -131,12 +131,12 @@ g_{\mathrm{ex}}(\nu)
 +
 \frac{\tanh^2(\nu x)}{x}
 \right]dx.
-$$
+```
 
 The positive demagnetizing-energy profile entering the reduced Hamiltonian is
 computed from the spherical-harmonic form
 
-$$
+```math
 g_{\mathrm{dem}}(\nu)
 =
 \frac{1}{2}
@@ -149,20 +149,20 @@ x\,\operatorname{sech}(\nu x)\,
 P_\ell\!\left(\sqrt{1-x^2}\right)
 \,dx
 \right]^2 .
-$$
+```
 
 The magnetization projected along the field axis is
 
-$$
+```math
 \langle m_z\rangle = g_z^z(\nu)\cos\tau .
-$$
+```
 
 ## Analytic Formulas
 
 The exact small-$\nu$ vortex-nucleation field of the reduced $\mathcal H''$
 model is
 
-$$
+```math
 B_{\mathrm{nuc}}
 =
 \frac{1}{3}\mu_0M_s
@@ -170,30 +170,30 @@ B_{\mathrm{nuc}}
 \frac{2K_u}{M_s}
 -
 \frac{10A}{M_sR^2}.
-$$
+```
 
 The exchange length is
 
-$$
+```math
 \ell_{\mathrm{ex}}
 =
 \sqrt{\frac{2A}{\mu_0M_s^2}}.
-$$
+```
 
 The anisotropy for which $B_{\mathrm{nuc}}=0$ is
 
-$$
+```math
 K_u
 =
 \frac{1}{6}\mu_0M_s^2
 \left(
 1-15\frac{\ell_{\mathrm{ex}}^2}{R^2}
 \right),
-$$
+```
 
 and the corresponding critical vortex-nucleation radius is
 
-$$
+```math
 R_{\mathrm{nuc}}
 =
 \sqrt{15}\,\ell_{\mathrm{ex}}
@@ -202,17 +202,17 @@ R_{\mathrm{nuc}}
 -
 6\frac{K_u}{\mu_0M_s^2}
 \right]^{-1/2}.
-$$
+```
 
 For the Stoner-Wohlfarth limit with
 
-$$
+```math
 B_K=\frac{2K_u}{M_s},
-$$
+```
 
 the astroid switching field is
 
-$$
+```math
 B_{\mathrm{sw}}(\beta)
 =
 B_K
@@ -221,11 +221,11 @@ B_K
 +
 |\cos\beta|^{2/3}
 \right)^{-3/2}.
-$$
+```
 
 The projected coercive field is
 
-$$
+```math
 B_c(\beta)
 =
 \begin{cases}
@@ -234,21 +234,21 @@ B_{\mathrm{sw}}(\beta),
 \frac{B_K}{2}|\sin(2\beta)|,
 & \pi/4 < \beta \le \pi/2.
 \end{cases}
-$$
+```
 
 The reduced Stoner-Wohlfarth astroid is parametrized as
 
-$$
+```math
 h_\parallel(\psi)=-\cos^3\psi,
 \qquad
 h_\perp(\psi)=\sin^3\psi,
-$$
+```
 
 and satisfies
 
-$$
+```math
 |h_\parallel|^{2/3}+|h_\perp|^{2/3}=1.
-$$
+```
 
 ## Installation
 
