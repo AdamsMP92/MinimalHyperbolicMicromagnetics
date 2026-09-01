@@ -638,6 +638,11 @@ result.uniform_vortex_curvature
 result.elapsed_s
 ```
 
+`compute_and_store_hysteresis` writes the complete field-resolved result to
+the requested CSV file and automatically adds a one-row `<stem>_metadata.csv`.
+The latter records the material and geometry, model switches, field and profile
+grid dimensions, and runtime.
+
 ## Standard Hysteresis Analysis
 
 The shared analysis API splits arbitrary field paths into monotonic branches
@@ -721,16 +726,15 @@ The `uniform-vortex-crossover` task computes the complete $\mathcal H'$ and
 $\mathcal H^{\prime\prime}$ radius series across the uniform-to-vortex
 crossover. Its defaults match the hyperbolic-model reference calculation of
 the accompanying spectral Galerkin study: radii from 6 to 20 nm in 0.5 nm
-increments and a nonuniform field protocol with 0.1 mT spacing throughout the
-possible coercive-field interval. The output contains the radius observables,
-the full field-resolved loops, the profile and field-protocol tables, run
-metadata, and a four-panel diagnostic plot. Each loop stores $\nu(B)$ and the
-model orientation coordinate $\tau(B)$, together with the energy and tracked
-stability quantities. A smaller pilot can be run, for example, with:
-
-    pixi run python examples/uniform_vortex_crossover_example.py \
-      --radius-min-nm 20 --radius-max-nm 20 --models Hpp \
-      --no-save-full-loops
+increments and a nonuniform field protocol. The finely sampled coercive window
+is derived as $1.25B_K$, while the vortex window extends to
+$\max_R[B_{\mathrm{nuc}}(R),0]+1.5B_K$; both boundaries are rounded outward to
+their respective field grids. The default spacing in the coercive window is
+0.1 mT. The output contains a compact radius summary, a four-panel diagnostic
+plot, and the full field-resolved loop plus its automatically generated
+one-row metadata table for every model and radius. Each loop stores $\nu(B)$
+and the model orientation coordinate $\tau(B)$, together with the energy and
+tracked stability quantities.
 
 ## Physics Checks
 

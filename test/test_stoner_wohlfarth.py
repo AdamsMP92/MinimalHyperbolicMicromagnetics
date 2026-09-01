@@ -71,8 +71,17 @@ def test_compute_and_store_hysteresis_writes_csv(tmp_path):
         ),
     )
     stored = pd.read_csv(output_csv)
+    metadata_csv = tmp_path / "hysteresis_metadata.csv"
+    metadata = pd.read_csv(metadata_csv).iloc[0]
 
     assert output_csv.exists()
+    assert metadata_csv.exists()
     assert len(result.B_T) == 14
     assert len(stored) == 14
     assert set(result.as_dict()).issubset(stored.columns)
+    assert metadata["Ku_J_per_m3"] == params.Ku
+    assert metadata["Ms_A_per_m"] == params.Ms
+    assert metadata["R_m"] == params.R
+    assert metadata["stoner_wohlfarth"]
+    assert metadata["field_points"] == 14
+    assert metadata["runtime_s"] >= 0.0

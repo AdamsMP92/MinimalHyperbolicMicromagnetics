@@ -581,16 +581,26 @@ def compute_and_store_hysteresis(
     print_runtime: bool = False,
     verbose: bool = False,
 ) -> HysteresisResult:
-    """Compute hysteresis, store it as CSV, and optionally create a plot."""
+    """Compute hysteresis and store its data and metadata as CSV files."""
     start = time.perf_counter()
+    resolved_settings = _resolve_hysteresis_settings(
+        settings,
+        Bmax,
+        n_half,
+        fields,
+        stoner_wohlfarth,
+    )
+    effective_profiles = (
+        stoner_wohlfarth_profiles()
+        if resolved_settings.stoner_wohlfarth
+        else profiles
+    )
+    if effective_profiles is None:
+        effective_profiles = compute_profiles()
     result = run_hysteresis(
         params,
-        profiles,
-        settings=settings,
-        Bmax=Bmax,
-        n_half=n_half,
-        fields=fields,
-        stoner_wohlfarth=stoner_wohlfarth,
+        effective_profiles,
+        settings=resolved_settings,
         verbose=verbose,
     )
 
@@ -606,6 +616,29 @@ def compute_and_store_hysteresis(
         plot_hysteresis(result, output_png)
 
     elapsed_s = time.perf_counter() - start
+    metadata_csv = output_csv.with_name(f"{output_csv.stem}_metadata.csv")
+    profile_nu = np.asarray(effective_profiles["nu"], dtype=float)
+    custom_fields = resolved_settings.fields is not None
+    metadata = {
+        "Ku_J_per_m3": params.Ku,
+        "Ms_A_per_m": params.Ms,
+        "A_J_per_m": params.A,
+        "R_m": params.R,
+        "beta_deg": params.beta_deg,
+        "gux_factor": params.gux_factor,
+        "stoner_wohlfarth": resolved_settings.stoner_wohlfarth,
+        "field_protocol": "custom" if custom_fields else "symmetric",
+        "Bmax_T": np.nan if custom_fields else resolved_settings.Bmax,
+        "n_half": np.nan if custom_fields else resolved_settings.n_half,
+        "field_points": len(result.B_T),
+        "field_min_T": float(np.min(result.B_T)),
+        "field_max_T": float(np.max(result.B_T)),
+        "profile_points": len(profile_nu),
+        "profile_nu_min": float(np.min(profile_nu)),
+        "profile_nu_max": float(np.max(profile_nu)),
+        "runtime_s": elapsed_s,
+    }
+    pd.DataFrame([metadata]).to_csv(metadata_csv, index=False)
     if print_runtime:
         print(f"Hysteresis runtime: {elapsed_s:.6f} s")
 
