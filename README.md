@@ -14,14 +14,25 @@ analytic checks for the vortex-nucleation field and the Stoner-Wohlfarth limit.
 
 ## References
 
-- Published article: [https://doi.org/10.1103/8rkf-j2kn](https://doi.org/10.1103/8rkf-j2kn)
-- arXiv preprint: [https://arxiv.org/abs/2601.17176](https://arxiv.org/abs/2601.17176)
-- Supplementary Zenodo repository: [https://doi.org/10.5281/zenodo.21481863](https://doi.org/10.5281/zenodo.21481863)
+### Primary literature
+
+- Published article on the minimal hyperbolic-vortex model:
+  [https://doi.org/10.1103/8rkf-j2kn](https://doi.org/10.1103/8rkf-j2kn)
+- Corresponding arXiv preprint:
+  [https://arxiv.org/abs/2601.17176](https://arxiv.org/abs/2601.17176)
 - Polarized SANS framework: [https://doi.org/10.1103/PhysRevB.110.014420](https://doi.org/10.1103/PhysRevB.110.014420)
 - Isotropic Stoner-Wohlfarth ensemble and its magnetic SANS observables: [Adams, Sinaga, and Michels, IUCrJ 10 (2023)](https://doi.org/10.1107/S205225252300180X)
+- Original Stoner-Wohlfarth article: [https://doi.org/10.1098/rsta.1948.0007](https://doi.org/10.1098/rsta.1948.0007)
+
+### Secondary literature
+
 - Stoner-Wohlfarth model review: [https://doi.org/10.1088/0143-0807/29/3/008](https://doi.org/10.1088/0143-0807/29/3/008)
 - Stoner-Wohlfarth static properties review: [https://doi.org/10.1016/j.physb.2008.05.031](https://doi.org/10.1016/j.physb.2008.05.031)
-- Original Stoner-Wohlfarth article: [https://doi.org/10.1098/rsta.1948.0007](https://doi.org/10.1098/rsta.1948.0007)
+
+### Research data and supplementary material
+
+- Supplementary Zenodo repository:
+  [https://doi.org/10.5281/zenodo.21481863](https://doi.org/10.5281/zenodo.21481863)
 
 ## Model
 
