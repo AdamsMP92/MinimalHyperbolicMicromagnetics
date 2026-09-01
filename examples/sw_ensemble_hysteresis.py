@@ -22,6 +22,8 @@ from minimal_hyperbolic_micromagnetics import (
     coercive_field_from_hysteresis,
     remanent_magnetization,
     run_hysteresis,
+    stoner_wohlfarth_ensemble_coercive_field,
+    stoner_wohlfarth_ensemble_remanence,
 )
 
 
@@ -122,6 +124,10 @@ coercive_field = coercive_field_from_hysteresis(
     ensemble_result,
     branch="descending",
 )
+reference_remanence = stoner_wohlfarth_ensemble_remanence()
+reference_coercive_field = stoner_wohlfarth_ensemble_coercive_field(
+    anisotropy_field
+)
 
 hysteresis_data = pd.DataFrame({
     "B_T": fields,
@@ -168,10 +174,20 @@ plt.close(fig)
 print(f"N_orientations = {N_ORIENTATIONS}")
 print(f"sum(weights) = {np.sum(weights):.16f}")
 print(f"descending remanence = {remanence:.8f}")
+print(f"reference remanence = {reference_remanence:.8f}")
 print(
     "descending coercive field = "
     f"{coercive_field:.8f} T "
     f"({coercive_field / anisotropy_field:.8f} B_K)"
+)
+print(
+    "reference coercive-field magnitude = "
+    f"{reference_coercive_field:.8f} T "
+    f"({reference_coercive_field / anisotropy_field:.14f} B_K)"
+)
+print(
+    "absolute coercive-field error = "
+    f"{abs(abs(coercive_field) - reference_coercive_field):.3e} T"
 )
 print(f"Saved hysteresis data to {OUTPUT_CSV}")
 print(f"Saved orientation quadrature to {ORIENTATION_CSV}")

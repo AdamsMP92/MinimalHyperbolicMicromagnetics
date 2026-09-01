@@ -18,8 +18,10 @@ analytic checks for the vortex-nucleation field and the Stoner-Wohlfarth limit.
 - arXiv preprint: [https://arxiv.org/abs/2601.17176](https://arxiv.org/abs/2601.17176)
 - Supplementary Zenodo repository: [https://doi.org/10.5281/zenodo.21481863](https://doi.org/10.5281/zenodo.21481863)
 - Polarized SANS framework: [https://doi.org/10.1103/PhysRevB.110.014420](https://doi.org/10.1103/PhysRevB.110.014420)
+- Isotropic Stoner-Wohlfarth ensemble and its magnetic SANS observables: [Adams, Sinaga, and Michels, IUCrJ 10 (2023)](https://doi.org/10.1107/S205225252300180X)
 - Stoner-Wohlfarth model review: [https://doi.org/10.1088/0143-0807/29/3/008](https://doi.org/10.1088/0143-0807/29/3/008)
 - Stoner-Wohlfarth static properties review: [https://doi.org/10.1016/j.physb.2008.05.031](https://doi.org/10.1016/j.physb.2008.05.031)
+- Original Stoner-Wohlfarth article: [https://doi.org/10.1098/rsta.1948.0007](https://doi.org/10.1098/rsta.1948.0007)
 
 ## Model
 
@@ -483,6 +485,50 @@ B_{\mathrm{sw}}(\beta),
 & \pi/4 < \beta \le \pi/2.
 \end{cases}
 ```
+
+### Isotropic Stoner-Wohlfarth Ensemble
+
+For a noninteracting ensemble of identical uniaxial particles with isotropically
+distributed easy axes, the normalized orientation measure is
+
+```math
+\sin\beta\,d\beta,
+\qquad
+0\leq\beta\leq\frac{\pi}{2}.
+```
+
+After saturation and removal of the field, each moment relaxes onto the nearest
+easy-axis direction. The reduced remanence is therefore exactly
+
+```math
+\frac{M_r}{M_s}
+=
+\int_0^{\pi/2}\cos\beta\sin\beta\,d\beta
+=
+\frac{1}{2}.
+```
+
+The ensemble coercivity is the zero of the orientation-averaged projected
+magnetization on the quasistatic descending branch. Unlike the remanence, it
+does not have a simple closed form. High-order Gauss-Legendre quadrature of the
+exact Stoner-Wohlfarth stationary states gives
+
+```math
+\frac{B_c}{B_K}
+=
+0.48221204600969\ldots,
+\qquad
+B_K=\frac{2K_u}{M_s}.
+```
+
+The literature commonly rounds this numerical constant to `0.48` and contains
+both `0.479` and `0.482`. The package keeps the converged value above and exposes
+the two ensemble references as
+`stoner_wohlfarth_ensemble_remanence` and
+`stoner_wohlfarth_ensemble_coercive_field`.
+[Table 1 and Fig. 2(b) of Adams, Sinaga, and Michels (2023)](https://doi.org/10.1107/S205225252300180X)
+provide a directly matching reference calculation for the isotropic uniaxial
+ensemble, reporting $m_r=0.5$ and $B_c/B_K=0.482$.
 
 ## Installation
 
