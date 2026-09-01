@@ -14,6 +14,7 @@ import pandas as pd
 from minimal_hyperbolic_micromagnetics import (
     HysteresisSettings,
     ModelParameters,
+    coercive_field_from_hysteresis,
     run_hysteresis,
     stoner_wohlfarth_coercive_field,
     stoner_wohlfarth_switching_field,
@@ -52,28 +53,6 @@ BMAX = 8.1
 N_FIELD = 6001
 
 
-def extract_coercive_field_from_descending_branch(result):
-    """Return |B_c| from the projected magnetization zero crossing."""
-    fields = np.asarray(result.B_T)
-    magnetization = np.asarray(result.mz_avg)
-
-    if not np.all(np.diff(fields) < 0.0):
-        n = len(fields) // 2
-        fields = fields[:n]
-        magnetization = magnetization[:n]
-
-    crossings = np.flatnonzero(np.sign(magnetization[:-1]) * np.sign(magnetization[1:]) <= 0)
-    if len(crossings) == 0:
-        return np.nan
-
-    i = int(crossings[0])
-    b0, b1 = fields[i], fields[i + 1]
-    m0, m1 = magnetization[i], magnetization[i + 1]
-    if m1 == m0:
-        return abs(0.5 * (b0 + b1))
-    return abs(b0 - m0 * (b1 - b0) / (m1 - m0))
-
-
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 base_model = ModelParameters(Ku=KU, Ms=MS, A=A, R=R)
@@ -87,7 +66,9 @@ for beta_deg in ANGLES_DEG:
     model = ModelParameters(Ku=KU, Ms=MS, A=A, R=R, beta_deg=beta_deg)
     result = run_hysteresis(model, settings=settings)
 
-    coercive_hysteresis = extract_coercive_field_from_descending_branch(result)
+    coercive_hysteresis = abs(
+        coercive_field_from_hysteresis(result, branch="descending")
+    )
     coercive_analytic = stoner_wohlfarth_coercive_field(beta, anisotropy_field)
     switching_analytic = stoner_wohlfarth_switching_field(beta, anisotropy_field)
 

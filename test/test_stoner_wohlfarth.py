@@ -5,21 +5,12 @@ from minimal_hyperbolic_micromagnetics import (
     HysteresisSettings,
     ModelParameters,
     astroid,
+    coercive_field_from_hysteresis,
     coercive_field_zero_crossing,
     compute_and_store_hysteresis,
     run_hysteresis,
     switching_field_astroid,
 )
-
-
-def _coercive_from_descending_branch(B, m):
-    n = len(B) // 2
-    B_desc = B[:n]
-    m_desc = m[:n]
-    crossings = np.where(np.sign(m_desc[:-1]) * np.sign(m_desc[1:]) <= 0)[0]
-    assert len(crossings) > 0
-    i = crossings[0]
-    return B_desc[i] - m_desc[i] * (B_desc[i + 1] - B_desc[i]) / (m_desc[i + 1] - m_desc[i])
 
 
 def test_astroid_from_minimal_model_matches_closed_form():
@@ -61,7 +52,7 @@ def test_sw_hysteresis_zero_crossing_matches_piecewise_theory():
                 stoner_wohlfarth=True,
             ),
         )
-        model = abs(_coercive_from_descending_branch(result.B_T, result.mz_avg))
+        model = abs(coercive_field_from_hysteresis(result))
         theory = coercive_field_zero_crossing(np.deg2rad(angle_deg), anisotropy_field)
         assert np.isclose(model, theory, rtol=1e-3, atol=2e-4)
 

@@ -2,8 +2,8 @@
 
 The analytic formula follows from the small-nu stability of the uniform state.
 The numerical estimate below uses the same reduced Hamiltonian, follows the
-metastable state from large positive field downward, and reads off where the
-tracked minimum first leaves nu=0.
+metastable state from large positive field downward, and interpolates the zero
+of the analytically evaluated uniform-state vortex curvature.
 """
 
 from pathlib import Path
@@ -19,6 +19,7 @@ from minimal_hyperbolic_micromagnetics import (
     compute_profiles,
     run_hysteresis,
     vortex_nucleation_field,
+    vortex_nucleation_field_from_hysteresis,
     vortex_nucleation_radius,
 )
 
@@ -43,9 +44,9 @@ A = 1e-11          # exchange stiffness [J/m]
 # =============================================================================
 # Numerical settings
 # =============================================================================
-# The nu grid controls how sharply the numerical hysteresis detects the loss of
-# stability. A smaller nu_max is enough here because nucleation happens close to
-# the uniform state.
+# A smaller nu_max is enough here because nucleation happens close to the
+# uniform state. Analytic profile derivatives provide the tracked
+# uniform-state vortex curvature throughout the field sweep.
 PROFILE_SETTINGS = ProfileComputation(
     nu_min=0.0,
     nu_max=6.0,
@@ -58,34 +59,11 @@ PROFILE_SETTINGS = ProfileComputation(
 # the first vortex nucleation event from the positive saturation branch.
 BMAX = 1.0
 N_FIELD = 1601
-NU_THRESHOLD = 0.5 * (PROFILE_SETTINGS.nu_max - PROFILE_SETTINGS.nu_min) / (PROFILE_SETTINGS.n_nu - 1)
-
-
-def estimate_nucleation_field_from_hysteresis(result, nu_threshold=NU_THRESHOLD):
-    """Estimate B_nuc from the first resolved departure from nu=0."""
-    nu = np.asarray(result.nu_min)
-    fields = np.asarray(result.B_T)
-    nonuniform = np.flatnonzero(nu > nu_threshold)
-
-    if len(nonuniform) == 0:
-        return np.nan
-
-    i = int(nonuniform[0])
-    if i == 0:
-        return fields[0]
-
-    # Linear interpolation of nu(B) to nu_threshold between the last nearly
-    # uniform field and the first resolved non-uniform field.
-    b0, b1 = fields[i - 1], fields[i]
-    n0, n1 = nu[i - 1], nu[i]
-    if n1 == n0:
-        return b1
-    return b0 + (nu_threshold - n0) * (b1 - b0) / (n1 - n0)
 
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-profiles = compute_profiles(PROFILE_SETTINGS)
+profiles = compute_profiles(PROFILE_SETTINGS, verbose=True)
 fields = np.linspace(BMAX, -BMAX, N_FIELD)
 
 critical_radius = vortex_nucleation_radius(KU, MS, A)
@@ -105,7 +83,11 @@ for radius in radii:
     result = run_hysteresis(model, profiles, settings=settings)
 
     analytic = vortex_nucleation_field(KU, MS, A, radius)
-    numerical = estimate_nucleation_field_from_hysteresis(result)
+    numerical = vortex_nucleation_field_from_hysteresis(
+        result,
+        branch="descending",
+        method="stability",
+    )
     rows.append({
         "R_nm": radius * 1e9,
         "B_nuc_analytic_T": analytic,

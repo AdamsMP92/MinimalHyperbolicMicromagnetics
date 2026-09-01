@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -70,15 +70,40 @@ class HysteresisResult:
     tau_rad: np.ndarray
     energy: np.ndarray
     elapsed_s: float | None = None
+    stability_nu_curvature: np.ndarray | None = None
+    stability_mixed_curvature: np.ndarray | None = None
+    stability_tau_curvature: np.ndarray | None = None
+    stability_eigenvalue_min: np.ndarray | None = None
+    stability_eigenvalue_max: np.ndarray | None = None
+    uniform_tau_rad: np.ndarray | None = None
+    uniform_vortex_curvature: np.ndarray | None = None
+    uniform_orientation_curvature: np.ndarray | None = None
+    uniform_stability_eigenvalue_min: np.ndarray | None = None
+    uniform_stability_eigenvalue_max: np.ndarray | None = None
 
     def as_dict(self):
-        return {
+        values = {
             "B_T": self.B_T,
             "mz_avg": self.mz_avg,
             "nu_min": self.nu_min,
             "tau_min_rad": self.tau_rad,
             "energy": self.energy,
+            "stability_nu_curvature": self.stability_nu_curvature,
+            "stability_mixed_curvature": self.stability_mixed_curvature,
+            "stability_tau_curvature": self.stability_tau_curvature,
+            "stability_eigenvalue_min": self.stability_eigenvalue_min,
+            "stability_eigenvalue_max": self.stability_eigenvalue_max,
+            "uniform_tau_rad": self.uniform_tau_rad,
+            "uniform_vortex_curvature": self.uniform_vortex_curvature,
+            "uniform_orientation_curvature": self.uniform_orientation_curvature,
+            "uniform_stability_eigenvalue_min": (
+                self.uniform_stability_eigenvalue_min
+            ),
+            "uniform_stability_eigenvalue_max": (
+                self.uniform_stability_eigenvalue_max
+            ),
         }
+        return {name: value for name, value in values.items() if value is not None}
 
 
 def stoner_wohlfarth_profiles():
@@ -90,6 +115,16 @@ def stoner_wohlfarth_profiles():
         "g_u_z": np.array([1.0]),
         "g_z_z": np.array([1.0]),
         "g_dem": np.array([0.0]),
+        "g_ex_d1": np.array([0.0]),
+        "g_ex_d2": np.array([4.0]),
+        "g_u_x_d1": np.array([0.0]),
+        "g_u_x_d2": np.array([16.0 / 15.0]),
+        "g_u_z_d1": np.array([0.0]),
+        "g_u_z_d2": np.array([-4.0 / 5.0]),
+        "g_z_z_d1": np.array([0.0]),
+        "g_z_z_d2": np.array([-2.0 / 5.0]),
+        "g_dem_d1": np.array([0.0]),
+        "g_dem_d2": np.array([2.0 / 15.0]),
     }
 
 
@@ -174,6 +209,120 @@ def hamiltonian(params, B, tau, gex, guz, gux, gzz, gdem):
         - params.Ms * B * params.R**2 / params.A * gzz * np.cos(tau)
         - MU_0 * params.Ms**2 * params.R**2 / params.A * gdem
     )
+
+
+def hamiltonian_hessian(
+    params,
+    B,
+    tau,
+    *,
+    guz,
+    gux,
+    gzz,
+    gex_d2,
+    guz_d1,
+    guz_d2,
+    gux_d1,
+    gux_d2,
+    gzz_d1,
+    gzz_d2,
+    gdem_d2,
+):
+    """Return the analytic reduced-energy Hessian in ``(nu, tau)``.
+
+    Both coordinates are dimensionless (angles are measured in radians), and
+    the energy is normalized by ``(4*pi/3) A R``.  Profile derivatives are
+    analytic derivatives with respect to ``nu``.
+    """
+    anisotropy = params.Ku * params.R**2 / params.A
+    zeeman = params.Ms * B * params.R**2 / params.A
+    demag = MU_0 * params.Ms**2 * params.R**2 / params.A
+    delta = tau - params.beta_rad
+
+    nu_curvature = (
+        gex_d2
+        - anisotropy
+        * (
+            guz_d2 * np.cos(delta) ** 2
+            + params.gux_factor * gux_d2 * np.sin(delta) ** 2
+        )
+        - zeeman * gzz_d2 * np.cos(tau)
+        - demag * gdem_d2
+    )
+    mixed_curvature = (
+        anisotropy
+        * (guz_d1 - params.gux_factor * gux_d1)
+        * np.sin(2.0 * delta)
+        + zeeman * gzz_d1 * np.sin(tau)
+    )
+    tau_curvature = (
+        2.0
+        * anisotropy
+        * (guz - params.gux_factor * gux)
+        * np.cos(2.0 * delta)
+        + zeeman * gzz * np.cos(tau)
+    )
+    return np.array(
+        [
+            [nu_curvature, mixed_curvature],
+            [mixed_curvature, tau_curvature],
+        ],
+        dtype=float,
+    )
+
+
+def _profile_derivative_arrays(profiles, nu):
+    """Read analytic profile derivatives, with a legacy-table fallback."""
+    names = ("g_ex", "g_u_x", "g_u_z", "g_z_z", "g_dem")
+    derivatives = {}
+    missing = []
+    for name in names:
+        for order in (1, 2):
+            key = f"{name}_d{order}"
+            if key in profiles:
+                derivatives[key] = np.asarray(profiles[key], dtype=float).copy()
+            else:
+                missing.append(key)
+
+    if missing:
+        can_reconstruct = len(nu) >= 3 and np.all(np.diff(nu) > 0.0)
+        for name in names:
+            if can_reconstruct:
+                values = np.asarray(profiles[name], dtype=float)
+                derivatives[f"{name}_d1"] = np.gradient(
+                    values, nu, edge_order=2
+                )
+                derivatives[f"{name}_d2"] = np.gradient(
+                    derivatives[f"{name}_d1"], nu, edge_order=2
+                )
+            else:
+                derivatives[f"{name}_d1"] = np.full(len(nu), np.nan)
+                derivatives[f"{name}_d2"] = np.full(len(nu), np.nan)
+
+    zero = np.isclose(nu, 0.0, rtol=0.0, atol=1.0e-14)
+    if np.any(zero):
+        exact_at_zero = {
+            "g_ex_d1": 0.0,
+            "g_ex_d2": 4.0,
+            "g_u_x_d1": 0.0,
+            "g_u_x_d2": 16.0 / 15.0,
+            "g_u_z_d1": 0.0,
+            "g_u_z_d2": -4.0 / 5.0,
+            "g_z_z_d1": 0.0,
+            "g_z_z_d2": -2.0 / 5.0,
+            "g_dem_d1": 0.0,
+            "g_dem_d2": 2.0 / 15.0,
+        }
+        for name, value in exact_at_zero.items():
+            derivatives[name][zero] = value
+    return derivatives
+
+
+def _symmetric_eigenvalues(matrix):
+    """Return the two analytic eigenvalues of a symmetric 2x2 matrix."""
+    mean = 0.5 * (matrix[0, 0] + matrix[1, 1])
+    radius = np.hypot(0.5 * (matrix[0, 0] - matrix[1, 1]), matrix[0, 1])
+    return mean - radius, mean + radius
 
 
 def _local_minimum_indices(values):
@@ -263,6 +412,7 @@ def run_hysteresis(
     )
 
     nu_all = np.asarray(profiles["nu"], dtype=float)
+    profile_derivatives = _profile_derivative_arrays(profiles, nu_all)
     if settings.stoner_wohlfarth:
         idx_map = np.array([np.argmin(np.abs(nu_all))])
     else:
@@ -274,11 +424,30 @@ def run_hysteresis(
     gux = np.asarray(profiles["g_u_x"], dtype=float)[idx_map]
     gzz = np.asarray(profiles["g_z_z"], dtype=float)[idx_map]
     gdem = np.asarray(profiles["g_dem"], dtype=float)[idx_map]
+    derivative_values = {
+        name: values[idx_map]
+        for name, values in profile_derivatives.items()
+    }
 
     nu_min = np.zeros(len(fields))
     tau_min = np.zeros(len(fields))
     mz_avg = np.zeros(len(fields))
     energy = np.zeros(len(fields))
+    stability_nu_curvature = np.zeros(len(fields))
+    stability_mixed_curvature = np.zeros(len(fields))
+    stability_tau_curvature = np.zeros(len(fields))
+    stability_eigenvalue_min = np.zeros(len(fields))
+    stability_eigenvalue_max = np.zeros(len(fields))
+    uniform_tau = np.full(len(fields), np.nan)
+    uniform_vortex_curvature = np.full(len(fields), np.nan)
+    uniform_orientation_curvature = np.full(len(fields), np.nan)
+    uniform_stability_eigenvalue_min = np.full(len(fields), np.nan)
+    uniform_stability_eigenvalue_max = np.full(len(fields), np.nan)
+
+    uniform_candidates = np.flatnonzero(
+        np.isclose(nu, 0.0, rtol=0.0, atol=1.0e-14)
+    )
+    uniform_index = int(uniform_candidates[0]) if len(uniform_candidates) else None
 
     tau_previous = 0.0
     idx_previous = 0
@@ -324,13 +493,77 @@ def run_hysteresis(
         tau_min[i] = tau_candidates[idx_min]
         mz_avg[i] = gzz[idx_min] * np.cos(tau_min[i])
         energy[i] = h_values[idx_min]
+
+        selected_hessian = hamiltonian_hessian(
+            params,
+            Bi,
+            tau_min[i],
+            guz=guz[idx_min],
+            gux=gux[idx_min],
+            gzz=gzz[idx_min],
+            gex_d2=derivative_values["g_ex_d2"][idx_min],
+            guz_d1=derivative_values["g_u_z_d1"][idx_min],
+            guz_d2=derivative_values["g_u_z_d2"][idx_min],
+            gux_d1=derivative_values["g_u_x_d1"][idx_min],
+            gux_d2=derivative_values["g_u_x_d2"][idx_min],
+            gzz_d1=derivative_values["g_z_z_d1"][idx_min],
+            gzz_d2=derivative_values["g_z_z_d2"][idx_min],
+            gdem_d2=derivative_values["g_dem_d2"][idx_min],
+        )
+        selected_eigenvalues = _symmetric_eigenvalues(selected_hessian)
+        stability_nu_curvature[i] = selected_hessian[0, 0]
+        stability_mixed_curvature[i] = selected_hessian[0, 1]
+        stability_tau_curvature[i] = selected_hessian[1, 1]
+        stability_eigenvalue_min[i] = selected_eigenvalues[0]
+        stability_eigenvalue_max[i] = selected_eigenvalues[1]
+
+        if uniform_index is not None:
+            uniform_tau[i] = tau_candidates[uniform_index]
+            uniform_hessian = hamiltonian_hessian(
+                params,
+                Bi,
+                uniform_tau[i],
+                guz=guz[uniform_index],
+                gux=gux[uniform_index],
+                gzz=gzz[uniform_index],
+                gex_d2=derivative_values["g_ex_d2"][uniform_index],
+                guz_d1=derivative_values["g_u_z_d1"][uniform_index],
+                guz_d2=derivative_values["g_u_z_d2"][uniform_index],
+                gux_d1=derivative_values["g_u_x_d1"][uniform_index],
+                gux_d2=derivative_values["g_u_x_d2"][uniform_index],
+                gzz_d1=derivative_values["g_z_z_d1"][uniform_index],
+                gzz_d2=derivative_values["g_z_z_d2"][uniform_index],
+                gdem_d2=derivative_values["g_dem_d2"][uniform_index],
+            )
+            uniform_eigenvalues = _symmetric_eigenvalues(uniform_hessian)
+            uniform_vortex_curvature[i] = uniform_hessian[0, 0]
+            uniform_orientation_curvature[i] = uniform_hessian[1, 1]
+            uniform_stability_eigenvalue_min[i] = uniform_eigenvalues[0]
+            uniform_stability_eigenvalue_max[i] = uniform_eigenvalues[1]
+
         tau_previous = tau_min[i]
         idx_previous = idx_min
 
         if verbose:
             print(f"B = {Bi:.3f} T,  m_z = {mz_avg[i]:.3f},  nu = {nu_min[i]:.3f}")
 
-    return HysteresisResult(fields, mz_avg, nu_min, tau_min, energy)
+    return HysteresisResult(
+        B_T=fields,
+        mz_avg=mz_avg,
+        nu_min=nu_min,
+        tau_rad=tau_min,
+        energy=energy,
+        stability_nu_curvature=stability_nu_curvature,
+        stability_mixed_curvature=stability_mixed_curvature,
+        stability_tau_curvature=stability_tau_curvature,
+        stability_eigenvalue_min=stability_eigenvalue_min,
+        stability_eigenvalue_max=stability_eigenvalue_max,
+        uniform_tau_rad=uniform_tau,
+        uniform_vortex_curvature=uniform_vortex_curvature,
+        uniform_orientation_curvature=uniform_orientation_curvature,
+        uniform_stability_eigenvalue_min=uniform_stability_eigenvalue_min,
+        uniform_stability_eigenvalue_max=uniform_stability_eigenvalue_max,
+    )
 
 
 def compute_and_store_hysteresis(
@@ -376,14 +609,7 @@ def compute_and_store_hysteresis(
     if print_runtime:
         print(f"Hysteresis runtime: {elapsed_s:.6f} s")
 
-    return HysteresisResult(
-        result.B_T,
-        result.mz_avg,
-        result.nu_min,
-        result.tau_rad,
-        result.energy,
-        elapsed_s,
-    )
+    return replace(result, elapsed_s=elapsed_s)
 
 
 def vortex_hysteresis(

@@ -258,3 +258,69 @@ g_{\mathrm{dem}}(0)=\frac{1}{3}.
 ```
 
 These values are used as numerical checks in the test suite.
+
+## Profile Derivatives and Stability Hessian
+
+The implementation differentiates the one-dimensional profile integrals and
+the Legendre moments analytically with respect to `\nu`. At the uniform state,
+the exact second derivatives are
+
+```math
+g_{\mathrm{ex}}''(0)=4,
+\qquad
+(g_u^x)''(0)=\frac{16}{15},
+\qquad
+(g_u^z)''(0)=-\frac45,
+```
+
+```math
+(g_z^z)''(0)=-\frac25,
+\qquad
+g_{\mathrm{dem}}''(0)=\frac{2}{15},
+```
+
+while all first derivatives vanish. These exact limits are inserted explicitly
+to avoid quadrature noise at `\nu=0`.
+
+Writing
+
+```math
+k=\frac{K_uR^2}{A},
+\qquad
+z=\frac{M_sBR^2}{A},
+\qquad
+d=\frac{\mu_0M_s^2R^2}{A},
+\qquad
+\delta=\tau-\beta,
+```
+
+and denoting the transverse-anisotropy multiplier `gux_factor` by `q`, the
+Hessian of the dimensionless reduced energy in the coordinates `(\nu,\tau)`
+has entries
+
+```math
+H_{\nu\nu}
+=g_{\mathrm{ex}}''
+-k\left[(g_u^z)''\cos^2\delta
++q(g_u^x)''\sin^2\delta\right]
+-z(g_z^z)''\cos\tau
+-d g_{\mathrm{dem}}'',
+```
+
+```math
+H_{\nu\tau}
+=k\left[(g_u^z)'-q(g_u^x)'\right]\sin(2\delta)
++z(g_z^z)'\sin\tau,
+```
+
+```math
+H_{\tau\tau}
+=2k\left[g_u^z-qg_u^x\right]\cos(2\delta)
++z g_z^z\cos\tau.
+```
+
+During a field sweep, these entries and both Hessian eigenvalues are evaluated
+at the selected state. The uniform state is tracked separately so that vortex
+nucleation can be located from the sign change of its `H_{\nu\nu}` curvature,
+including after the field-following solution has already moved onto the vortex
+branch.

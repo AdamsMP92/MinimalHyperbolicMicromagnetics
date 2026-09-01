@@ -18,6 +18,7 @@ from minimal_hyperbolic_micromagnetics import (
     run_hysteresis,
     stoner_wohlfarth_astroid,
     stoner_wohlfarth_switching_field,
+    switching_field_from_hysteresis,
 )
 
 
@@ -52,23 +53,6 @@ BMAX = 8.1
 N_FIELD = 6001
 
 
-def extract_switching_field_from_descending_branch(result):
-    """Return the field where the SW branch jumps during the descending sweep."""
-    all_fields = np.asarray(result.B_T)
-    all_tau = np.asarray(result.tau_rad)
-
-    if np.all(np.diff(all_fields) < 0.0):
-        fields = all_fields
-        tau = np.unwrap(all_tau)
-    else:
-        n = len(all_fields) // 2
-        fields = all_fields[:n]
-        tau = np.unwrap(all_tau[:n])
-
-    jump_index = int(np.argmax(np.abs(np.diff(tau))))
-    return 0.5 * (fields[jump_index] + fields[jump_index + 1])
-
-
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 base_model = ModelParameters(Ku=KU, Ms=MS, A=A, R=R)
@@ -82,7 +66,9 @@ for beta_deg in ANGLES_DEG:
     model = ModelParameters(Ku=KU, Ms=MS, A=A, R=R, beta_deg=beta_deg)
     result = run_hysteresis(model, settings=settings)
 
-    switching_hysteresis = abs(extract_switching_field_from_descending_branch(result))
+    switching_hysteresis = abs(
+        switching_field_from_hysteresis(result, branch="descending")
+    )
     switching_analytic = stoner_wohlfarth_switching_field(beta, anisotropy_field)
 
     rows.append({

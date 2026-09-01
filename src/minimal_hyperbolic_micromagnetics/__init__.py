@@ -1,5 +1,16 @@
 """Minimal hyperbolic-vortex micromagnetics for spherical particles."""
 
+from .analysis import (
+    BranchObservables,
+    HysteresisAnalysis,
+    HysteresisBranch,
+    analyze_hysteresis,
+    coercive_field_from_hysteresis,
+    remanent_magnetization,
+    split_field_branches,
+    switching_field_from_hysteresis,
+    vortex_nucleation_field_from_hysteresis,
+)
 from .analytical_formulas import (
     critical_anisotropy_for_zero_nucleation_field,
     exchange_length,
@@ -17,6 +28,7 @@ from .hysteresis import (
     coercive_field_zero_crossing,
     compute_and_store_hysteresis,
     hamiltonian,
+    hamiltonian_hessian,
     run_hysteresis,
     stoner_wohlfarth_profiles,
     switching_field_astroid,
@@ -36,18 +48,24 @@ from .profiles import (
     g_u_z,
     g_z_z,
     local_profiles,
+    profile_derivatives,
 )
 from .plotting import plot_hysteresis, plot_profiles
 
 __all__ = [
+    "BranchObservables",
+    "HysteresisAnalysis",
+    "HysteresisBranch",
     "HysteresisResult",
     "HysteresisSettings",
     "MU_0",
     "ModelParameters",
     "ProfileComputation",
     "all_profiles",
+    "analyze_hysteresis",
     "astroid",
     "coercive_field_zero_crossing",
+    "coercive_field_from_hysteresis",
     "critical_anisotropy_for_zero_nucleation_field",
     "compute_and_store_hysteresis",
     "compute_profiles",
@@ -61,16 +79,22 @@ __all__ = [
     "g_u_z",
     "g_z_z",
     "hamiltonian",
+    "hamiltonian_hessian",
     "local_profiles",
     "plot_hysteresis",
     "plot_profiles",
+    "profile_derivatives",
+    "remanent_magnetization",
     "run_hysteresis",
     "stoner_wohlfarth_astroid",
     "stoner_wohlfarth_coercive_field",
     "stoner_wohlfarth_profiles",
     "stoner_wohlfarth_switching_field",
+    "split_field_branches",
     "switching_field_astroid",
+    "switching_field_from_hysteresis",
     "vortex_nucleation_field",
+    "vortex_nucleation_field_from_hysteresis",
     "vortex_nucleation_radius",
     "vortex_hysteresis",
 ]

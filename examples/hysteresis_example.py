@@ -15,6 +15,7 @@ from minimal_hyperbolic_micromagnetics import (
     HysteresisSettings,
     ModelParameters,
     ProfileComputation,
+    analyze_hysteresis,
     compute_and_store_hysteresis,
     compute_and_store_profiles,
 )
@@ -85,6 +86,7 @@ profiles = compute_and_store_profiles(
     PROFILE_SETTINGS,
     output_png=PROFILE_PNG,
     make_plot=MAKE_PROFILE_PLOT,
+    verbose=True,
 )
 
 result = compute_and_store_hysteresis(
@@ -95,3 +97,12 @@ result = compute_and_store_hysteresis(
     output_png=HYSTERESIS_PNG if MAKE_HYSTERESIS_PLOT else None,
     print_runtime=True,
 )
+
+analysis = analyze_hysteresis(result)
+for branch in analysis.branches:
+    print(
+        f"{branch.name}: "
+        f"m_r={branch.remanence:+.6f}, "
+        f"B_c={branch.coercive_field_T:+.6f} T, "
+        f"B_nuc={branch.vortex_nucleation_field_T:+.6f} T"
+    )
