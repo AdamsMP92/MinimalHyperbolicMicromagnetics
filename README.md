@@ -99,8 +99,31 @@ the anisotropy, Zeeman, and magnetostatic prefactors become
 This is the normalization used in the code and yields the compact prefactors
 shown in the reduced Hamiltonians:
 
-For a uniaxial anisotropy direction tilted by an angle $\beta$ relative to the
-field axis, the reduced Hamiltonian used by the package is
+The external field defines the laboratory $z$-axis. The uniaxial anisotropy
+direction can then be chosen in the $xz$-plane and parametrized by its angle
+$\beta$ relative to the field axis:
+
+```math
+\mathbf B_{\mathrm{ext}}
+=
+B_{\mathrm{ext}}\,\mathbf e_z,
+\qquad
+\mathbf e_u(\beta)
+=
+\sin\beta\,\mathbf e_x
++
+\cos\beta\,\mathbf e_z
+=
+\begin{pmatrix}
+\sin\beta\\
+0\\
+\cos\beta
+\end{pmatrix}.
+```
+
+Thus $\beta=0$ corresponds to an easy axis parallel to the applied field. In
+the following reduced Hamiltonians, $B\equiv B_{\mathrm{ext}}$ denotes its
+signed scalar amplitude. The reduced Hamiltonian used by the package is
 
 ```math
 \mathcal H'(\nu,\tau,B,\beta)
