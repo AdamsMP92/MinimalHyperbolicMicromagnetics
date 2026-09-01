@@ -10,6 +10,7 @@ compute = "python examples/hysteresis_example.py"
 nucleation-field = "python examples/nucleation_field_example.py"
 sw-astroide-example = "python examples/sw_astroide_example.py"
 coercive-field = "python examples/sw_coercive_field_example.py"
+sw-ensemble = "python examples/sw_ensemble_hysteresis.py"
 test = "pytest test"
 sw-astroid = "python test/test_sw_astroid_minimal_model.py"
 

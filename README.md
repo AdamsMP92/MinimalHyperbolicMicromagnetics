@@ -626,9 +626,16 @@ pixi run compute
 pixi run nucleation-field
 pixi run sw-astroide-example
 pixi run coercive-field
+pixi run sw-ensemble
 ```
 
 They generate CSV and PNG output in separate ignored output folders.
+
+`sw-ensemble` computes the hysteresis of an isotropically oriented ensemble of
+uniaxial Stoner-Wohlfarth particles. It averages over the easy-axis angle with
+the three-dimensional measure $\sin\beta\,d\beta$, implemented as
+Gauss-Legendre quadrature in $\cos\beta$, and compares the result with the
+aligned $\beta=0$ loop.
 
 ## Physics Checks
 

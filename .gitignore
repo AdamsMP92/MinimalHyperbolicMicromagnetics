@@ -15,6 +15,7 @@ nucleation_field_example_output/
 sw_astroide_example_output/
 coercive_field_example_output/
 sw_coercive_field_example_output/
+sw_ensemble_hysteresis_output/
 vortex_energy_profiles.csv
 vortex_energy_profiles.png
 model_hysteresis.csv
