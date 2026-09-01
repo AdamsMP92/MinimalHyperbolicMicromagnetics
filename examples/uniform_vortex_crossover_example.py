@@ -9,6 +9,7 @@ observables, and creates a diagnostic radius plot.
 
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -124,7 +125,11 @@ columns = [
     "remanent_tau_rad",
     "coercive_field_T",
 ]
-axes = summary.pivot(index="radius_nm", columns="model", values=columns).plot(
-    subplots=True, layout=(2, 2), figsize=(8, 6), grid=True
-)
-axes.flat[0].figure.savefig(OUTPUT / "uniform_vortex_crossover.png", dpi=300)
+labels = [r"$m_r$", r"$B_{v\to u}$ (T)", r"$\tau_{rem}$ (rad)", r"$B_c$ (T)"]
+figure, axes = plt.subplots(2, 2, figsize=(8, 6), sharex=True, constrained_layout=True)
+for axis, column, label in zip(axes.flat, columns, labels):
+    summary.pivot(index="radius_nm", columns="model", values=column).plot(ax=axis)
+    axis.set(xlabel=r"$R$ (nm)", ylabel=label)
+    axis.grid(alpha=0.2)
+figure.savefig(OUTPUT / "uniform_vortex_crossover.png", dpi=300)
+plt.close(figure)
