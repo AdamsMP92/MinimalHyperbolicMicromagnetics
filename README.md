@@ -177,6 +177,10 @@ the magnetostatic self-energy.
 A more detailed derivation is provided in
 [docs/profile_derivation.md](docs/profile_derivation.md).
 
+An undergraduate-level, step-by-step account of the quasistatic continuation
+and the extraction of hysteresis observables is provided in
+[docs/hysteresis_protocol.md](docs/hysteresis_protocol.md).
+
 The optimized dimensionless profile functions are
 
 ```math
