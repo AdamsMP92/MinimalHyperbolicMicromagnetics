@@ -31,7 +31,7 @@ from minimal_hyperbolic_micromagnetics import (
 # Output configuration
 # =============================================================================
 HERE = Path(__file__).resolve().parents[1]
-OUTPUT_DIR = HERE / "sw_ensemble_hysteresis_output"
+OUTPUT_DIR = HERE / "sw_ensemble_hysteresis_example_output"
 OUTPUT_CSV = OUTPUT_DIR / "sw_ensemble_hysteresis.csv"
 ORIENTATION_CSV = OUTPUT_DIR / "sw_ensemble_orientations.csv"
 OUTPUT_PNG = OUTPUT_DIR / "sw_ensemble_hysteresis.png"

@@ -699,8 +699,11 @@ The main implementation is divided by responsibility:
   hysteresis and coercive-field analysis.
 - examples/nucleation_field_example.py compares the stability-based numerical
   nucleation field with the analytic result.
-- examples/sw_ensemble_hysteresis.py demonstrates averaging over easy-axis
-  orientations.
+- examples/uniform_vortex_crossover_example.py generates the radius-dependent
+  remanence, vortex-to-uniform return field, texture-axis angle, and coercive
+  field, while retaining the complete field histories of $\nu$ and $\tau$.
+- examples/sw_ensemble_hysteresis_example.py demonstrates averaging over
+  easy-axis orientations.
 
 Reading these files in that order mirrors the logical order of this chapter:
 define the path, follow the state, and only then analyze the completed loop.

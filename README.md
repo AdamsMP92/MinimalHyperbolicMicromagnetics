@@ -706,6 +706,7 @@ pixi run nucleation-field
 pixi run sw-astroide-example
 pixi run coercive-field
 pixi run sw-ensemble
+pixi run uniform-vortex-crossover
 ```
 
 They generate CSV and PNG output in separate ignored output folders.
@@ -715,6 +716,21 @@ uniaxial Stoner-Wohlfarth particles. It averages over the easy-axis angle with
 the three-dimensional measure $\sin\beta\,d\beta$, implemented as
 Gauss-Legendre quadrature in $\cos\beta$, and compares the result with the
 aligned $\beta=0$ loop.
+
+The `uniform-vortex-crossover` task computes the complete $\mathcal H'$ and
+$\mathcal H^{\prime\prime}$ radius series across the uniform-to-vortex
+crossover. Its defaults match the hyperbolic-model reference calculation of
+the accompanying spectral Galerkin study: radii from 6 to 20 nm in 0.5 nm
+increments and a nonuniform field protocol with 0.1 mT spacing throughout the
+possible coercive-field interval. The output contains the radius observables,
+the full field-resolved loops, the profile and field-protocol tables, run
+metadata, and a four-panel diagnostic plot. Each loop stores $\nu(B)$ and the
+model orientation coordinate $\tau(B)$, together with the energy and tracked
+stability quantities. A smaller pilot can be run, for example, with:
+
+    pixi run python examples/uniform_vortex_crossover_example.py \
+      --radius-min-nm 20 --radius-max-nm 20 --models Hpp \
+      --no-save-full-loops
 
 ## Physics Checks
 
