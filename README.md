@@ -16,23 +16,41 @@ analytic checks for the vortex-nucleation field and the Stoner-Wohlfarth limit.
 
 ### Primary literature
 
-- Published article on the minimal hyperbolic-vortex model:
-  [https://doi.org/10.1103/8rkf-j2kn](https://doi.org/10.1103/8rkf-j2kn)
-- Corresponding arXiv preprint:
-  [https://arxiv.org/abs/2601.17176](https://arxiv.org/abs/2601.17176)
-- Polarized SANS framework: [https://doi.org/10.1103/PhysRevB.110.014420](https://doi.org/10.1103/PhysRevB.110.014420)
-- Isotropic Stoner-Wohlfarth ensemble and its magnetic SANS observables: [Adams, Sinaga, and Michels, IUCrJ 10 (2023)](https://doi.org/10.1107/S205225252300180X)
-- Original Stoner-Wohlfarth article: [https://doi.org/10.1098/rsta.1948.0007](https://doi.org/10.1098/rsta.1948.0007)
+- M. P. Adams and A. Michels, “Minimal model for vortex nucleation and
+  reversal in spherical magnetic nanoparticles,” *Phys. Rev. B* **113**,
+  224406 (2026).
+  [doi:10.1103/8rkf-j2kn](https://doi.org/10.1103/8rkf-j2kn)
+- M. P. Adams and A. Michels, “Minimal model for vortex nucleation and
+  reversal in spherical magnetic nanoparticles,” arXiv:2601.17176
+  [cond-mat.mtrl-sci] (2026).
+  [arXiv:2601.17176](https://arxiv.org/abs/2601.17176)
+- M. P. Adams, E. P. Sinaga, Š. Liščák, and A. Michels, “Framework for
+  polarized magnetic neutron scattering from nanoparticle assemblies with
+  vortex-type spin textures,” *Phys. Rev. B* **110**, 014420 (2024).
+  [doi:10.1103/PhysRevB.110.014420](https://doi.org/10.1103/PhysRevB.110.014420)
+- M. P. Adams, E. P. Sinaga, and A. Michels, “On the angular anisotropy of
+  the randomly averaged magnetic neutron scattering cross section of
+  nanoparticles,” *IUCrJ* **10**, 261–269 (2023).
+  [doi:10.1107/S205225252300180X](https://doi.org/10.1107/S205225252300180X)
+- E. C. Stoner and E. P. Wohlfarth, “A mechanism of magnetic hysteresis in
+  heterogeneous alloys,” *Philos. Trans. R. Soc. London, Ser. A* **240**,
+  599–642 (1948).
+  [doi:10.1098/rsta.1948.0007](https://doi.org/10.1098/rsta.1948.0007)
 
 ### Secondary literature
 
-- Stoner-Wohlfarth model review: [https://doi.org/10.1088/0143-0807/29/3/008](https://doi.org/10.1088/0143-0807/29/3/008)
-- Stoner-Wohlfarth static properties review: [https://doi.org/10.1016/j.physb.2008.05.031](https://doi.org/10.1016/j.physb.2008.05.031)
+- C. Tannous and J. Gieraltowski, “The Stoner–Wohlfarth model of
+  ferromagnetism,” *Eur. J. Phys.* **29**, 475–487 (2008).
+  [doi:10.1088/0143-0807/29/3/008](https://doi.org/10.1088/0143-0807/29/3/008)
+- C. Tannous and J. Gieraltowski, “A Stoner–Wohlfarth model Redux: Static
+  properties,” *Physica B* **403**, 3563–3570 (2008).
+  [doi:10.1016/j.physb.2008.05.031](https://doi.org/10.1016/j.physb.2008.05.031)
 
 ### Research data and supplementary material
 
-- Supplementary Zenodo repository:
-  [https://doi.org/10.5281/zenodo.21481863](https://doi.org/10.5281/zenodo.21481863)
+- M. P. Adams, *Minimal model for vortex nucleation and reversal in spherical
+  magnetic nanoparticles*, Zenodo, version 1.1 (2026).
+  [doi:10.5281/zenodo.21481863](https://doi.org/10.5281/zenodo.21481863)
 
 ## Model
 
