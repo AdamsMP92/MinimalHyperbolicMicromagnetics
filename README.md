@@ -534,7 +534,7 @@ After saturation and removal of the field, each moment relaxes onto the nearest
 easy-axis direction. The reduced remanence is therefore exactly
 
 ```math
-\frac{M_r}{M_s}
+\frac{\langle M_r\rangle}{M_s}
 =
 \int_0^{\pi/2}\cos\beta\sin\beta\,d\beta
 =
@@ -547,7 +547,7 @@ does not have a simple closed form. High-order Gauss-Legendre quadrature of the
 exact Stoner-Wohlfarth stationary states gives
 
 ```math
-\frac{B_c}{B_K}
+\frac{\langle B_c\rangle}{B_K}
 =
 0.48221204600969\ldots,
 \qquad
