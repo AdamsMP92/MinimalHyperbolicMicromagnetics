@@ -5,8 +5,12 @@ the two hyperbolic models H' and H''.  The package stores every field-resolved
 state and a small metadata table automatically.  This script only constructs
 the physical field path, runs the calculations, extracts a few remanent
 observables, and creates a diagnostic radius plot.
+
+Use ``--models Hp`` to recompute only H' or ``--radii-nm 20`` for a focused
+pilot without changing the physical field protocol.
 """
 
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -23,7 +27,7 @@ from minimal_hyperbolic_micromagnetics import (
     vortex_nucleation_field,
 )
 
-OUTPUT = (
+DEFAULT_OUTPUT = (
     Path(__file__).resolve().parents[1]
     / "uniform_vortex_crossover_example_output"
 )
@@ -34,10 +38,40 @@ RADII_NM = np.arange(6.0, 20.5, 0.5)
 
 # gux_factor=0 gives H'', while gux_factor=1 retains the transverse anisotropy
 # contribution and gives H'.  All other inputs are identical for both models.
-MODELS = {"Hpp": 0.0, "Hp": 1.0}
+MODEL_FACTORS = {"Hpp": 0.0, "Hp": 1.0}
 
 # Maximum field and target increments for the three resolution regions.
 BMAX, LOW_STEP, MID_STEP, OUTER_STEP = 1.0, 1e-4, 1e-3, 5e-3
+
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument(
+    "--models",
+    nargs="+",
+    choices=tuple(MODEL_FACTORS),
+    default=tuple(MODEL_FACTORS),
+    help="reduced models to calculate (default: Hpp Hp)",
+)
+parser.add_argument(
+    "--radii-nm",
+    nargs="+",
+    type=float,
+    default=None,
+    help="selected radii in nm (default: 6 to 20 nm in 0.5 nm steps)",
+)
+parser.add_argument(
+    "--output",
+    type=Path,
+    default=DEFAULT_OUTPUT,
+    help="output directory",
+)
+args = parser.parse_args()
+
+MODELS = {name: MODEL_FACTORS[name] for name in args.models}
+selected_radii_nm = (
+    RADII_NM if args.radii_nm is None else np.asarray(args.radii_nm, dtype=float)
+)
+OUTPUT = args.output.resolve()
 
 
 def segment(start: float, stop: float, step: float) -> np.ndarray:
@@ -80,7 +114,7 @@ profiles = compute_profiles(
 OUTPUT.mkdir(parents=True, exist_ok=True)
 rows = []
 for name, gux_factor in MODELS.items():
-    for radius_nm in RADII_NM:
+    for radius_nm in selected_radii_nm:
         model = ModelParameters(KU, MS, A, radius_nm * 1e-9, gux_factor=gux_factor)
 
         # This core function writes both the complete loop and a one-row
@@ -113,9 +147,16 @@ for name, gux_factor in MODELS.items():
         })
 
 # One compact table collects the radius-dependent quantities; the full field
-# histories remain in the individual hysteresis CSV files.
+# histories remain in the individual hysteresis CSV files.  When only one
+# model is recomputed, retain the summary rows of the untouched model.
+summary_path = OUTPUT / "radius_observables.csv"
 summary = pd.DataFrame(rows)
-summary.to_csv(OUTPUT / "radius_observables.csv", index=False)
+if summary_path.exists():
+    previous = pd.read_csv(summary_path)
+    previous = previous.loc[~previous["model"].isin(MODELS)]
+    summary = pd.concat([previous, summary], ignore_index=True)
+summary = summary.sort_values(["model", "radius_nm"]).reset_index(drop=True)
+summary.to_csv(summary_path, index=False)
 
 # This is intentionally a simple diagnostic plot.  Publication styling and
 # further derived quantities belong to the paper repository.
