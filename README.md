@@ -231,11 +231,11 @@ x\sqrt{1-x^2}\,
 ```math
 g_u^x(\nu)
 =
-4\int_0^1
+\frac{3}{2}\int_0^1
 x\sqrt{1-x^2}\,
 \tanh^2(\nu x)\,dx
 =
-\frac{4}{3}\left[1-g_u^z(\nu)\right],
+\frac{1}{2}\left[1-g_u^z(\nu)\right],
 ```
 
 ```math
@@ -742,7 +742,7 @@ tracked stability quantities.
 The package includes focused tests for:
 
 - the uniform-profile limit,
-- the optimized identity `g_u^x = 4/3 (1 - g_u^z)`,
+- the exact identity `g_u^x = 1/2 (1 - g_u^z)`,
 - the analytic vortex-nucleation formulas,
 - the Stoner-Wohlfarth astroid,
 - the distinction between switching field and projected coercive field.

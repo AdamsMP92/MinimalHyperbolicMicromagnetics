@@ -71,7 +71,7 @@ The transverse anisotropy profile is
 ```math
 g_u^x(\nu)
 =
-4\int_0^1
+\frac{3}{2}\int_0^1
 x\sqrt{1-x^2}\,
 \tanh^2(\nu x)\,dx.
 ```
@@ -93,7 +93,7 @@ one obtains the useful identity
 ```math
 g_u^x(\nu)
 =
-\frac{4}{3}\left[1-g_u^z(\nu)\right].
+\frac{1}{2}\left[1-g_u^z(\nu)\right].
 ```
 
 ## Exchange Profile
@@ -268,7 +268,7 @@ the exact second derivatives are
 ```math
 g_{\mathrm{ex}}''(0)=4,
 \qquad
-(g_u^x)''(0)=\frac{16}{15},
+(g_u^x)''(0)=\frac{2}{5},
 \qquad
 (g_u^z)''(0)=-\frac45,
 ```

@@ -25,8 +25,43 @@ def test_uniform_limit_profiles():
 def test_gux_reduces_to_guz_identity():
     nu = np.linspace(0.0, 8.0, 17)
     profiles = all_profiles(nu, n_quad=160, l_max=41)
-    expected = 4.0 / 3.0 * (1.0 - profiles["g_u_z"])
+    expected = 0.5 * (1.0 - profiles["g_u_z"])
     assert np.allclose(profiles["g_u_x"], expected, rtol=1e-11, atol=1e-11)
+    assert np.allclose(
+        2.0 * profiles["g_u_x"] + profiles["g_u_z"],
+        1.0,
+        rtol=1e-11,
+        atol=1e-11,
+    )
+
+
+def test_gux_matches_direct_spherical_volume_average():
+    # This independently evaluates the published two-dimensional integral.
+    # Its factor 3/4 combines spherical-volume normalization (3) with the
+    # azimuthal average of one transverse Cartesian component (1/2).
+    nodes, weights = np.polynomial.legendre.leggauss(120)
+    xi = 0.5 * (nodes + 1.0)
+    w_xi = 0.5 * weights
+    theta = 0.5 * np.pi * (nodes + 1.0)
+    w_theta = 0.5 * np.pi * weights
+    xi_grid, theta_grid = np.meshgrid(xi, theta, indexing="ij")
+    measure = (
+        w_xi[:, None]
+        * w_theta[None, :]
+        * xi_grid**2
+        * np.sin(theta_grid)
+    )
+
+    for nu in (0.5, 2.0, 6.0):
+        direct = 0.75 * np.sum(
+            measure * np.tanh(nu * xi_grid * np.sin(theta_grid)) ** 2
+        )
+        assert np.isclose(
+            all_profiles(np.array([nu]), n_quad=360, l_max=41)["g_u_x"][0],
+            direct,
+            rtol=2e-7,
+            atol=2e-9,
+        )
 
 
 def test_compute_profiles_uses_parametrized_grid():
@@ -76,7 +111,7 @@ def test_profile_derivatives_have_exact_uniform_limits():
     assert derivatives["g_ex_d1"] == 0.0
     assert derivatives["g_ex_d2"] == 4.0
     assert derivatives["g_u_z_d2"] == -4.0 / 5.0
-    assert derivatives["g_u_x_d2"] == 16.0 / 15.0
+    assert derivatives["g_u_x_d2"] == 2.0 / 5.0
     assert derivatives["g_z_z_d2"] == -2.0 / 5.0
     assert derivatives["g_dem_d2"] == 2.0 / 15.0
 

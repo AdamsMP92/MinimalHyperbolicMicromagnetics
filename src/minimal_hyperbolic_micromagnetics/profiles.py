@@ -79,7 +79,10 @@ def local_profiles(nu, n_quad=360, chunk_size=256):
             w[None, :] * volume_weight[None, :] * sech_psi,
             axis=1,
         )
-        gux[start:stop] = 4.0 / 3.0 * (1.0 - guz[start:stop])
+        # The transverse Cartesian component contains the azimuthal average
+        # <sin^2(phi)> = 1/2.  Since tanh^2 + sech^2 = 1, the normalized
+        # spherical-volume profiles therefore obey 2*g_u_x + g_u_z = 1.
+        gux[start:stop] = 0.5 * (1.0 - guz[start:stop])
 
         winding_term = np.divide(
             tanh_psi**2,
@@ -278,8 +281,8 @@ def profile_derivatives(
         )
         derivatives["g_u_z_d1"][start:stop] = guz_d1
         derivatives["g_u_z_d2"][start:stop] = guz_d2
-        derivatives["g_u_x_d1"][start:stop] = -4.0 / 3.0 * guz_d1
-        derivatives["g_u_x_d2"][start:stop] = -4.0 / 3.0 * guz_d2
+        derivatives["g_u_x_d1"][start:stop] = -0.5 * guz_d1
+        derivatives["g_u_x_d2"][start:stop] = -0.5 * guz_d2
         derivatives["g_z_z_d1"][start:stop] = gzz_d1
         derivatives["g_z_z_d2"][start:stop] = gzz_d2
 
@@ -344,7 +347,7 @@ def profile_derivatives(
             "g_ex_d1": 0.0,
             "g_ex_d2": 4.0,
             "g_u_x_d1": 0.0,
-            "g_u_x_d2": 16.0 / 15.0,
+            "g_u_x_d2": 2.0 / 5.0,
             "g_u_z_d1": 0.0,
             "g_u_z_d2": -4.0 / 5.0,
             "g_z_z_d1": 0.0,
