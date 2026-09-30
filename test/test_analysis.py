@@ -13,6 +13,7 @@ from minimal_hyperbolic_micromagnetics import (
     run_hysteresis,
     split_field_branches,
     vortex_nucleation_field_from_hysteresis,
+    vortex_to_uniform_field_from_hysteresis,
 )
 
 
@@ -63,6 +64,23 @@ def test_uniform_vortex_curvature_recovers_analytic_nucleation_field():
     assert np.isclose(numerical, params.nucleation_field_T(), atol=1.0e-14)
     assert np.all(np.isfinite(result.stability_eigenvalue_min))
     assert np.all(np.isfinite(result.stability_eigenvalue_max))
+
+
+def test_vortex_to_uniform_field_is_a_separate_branch_endpoint():
+    result = _synthetic_loop()
+    result.nu_min[:] = np.array([
+        0.0, 1.0, 1.0, 1.0, 0.0,
+        0.0, 0.0, 1.0, 1.0, 0.0,
+    ])
+
+    assert np.isclose(
+        vortex_to_uniform_field_from_hysteresis(result, branch="ascending"),
+        1.0,
+    )
+    assert np.isclose(
+        vortex_to_uniform_field_from_hysteresis(result, branch="descending"),
+        -1.0,
+    )
 
 
 def test_analytic_hessian_matches_reduced_energy_finite_differences():

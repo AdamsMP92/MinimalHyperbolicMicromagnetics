@@ -269,6 +269,35 @@ def vortex_nucleation_field_from_hysteresis(
     return _threshold_nucleation_field(selected, nu_threshold)
 
 
+def vortex_to_uniform_field_from_hysteresis(
+    result: HysteresisResult,
+    *,
+    branch="ascending",
+    occurrence=0,
+    nu_threshold=1.0e-12,
+) -> float:
+    """Return the signed field where a continued vortex branch becomes uniform.
+
+    The event is identified directly from the explicit vortex coordinate:
+    along the selected field leg, ``nu_min`` must change from above the
+    threshold to at or below it. The returned value is the first sampled
+    field at which the uniform state is reached. This endpoint is distinct
+    from the uniform-state spinodal returned by
+    :func:`vortex_nucleation_field_from_hysteresis`.
+    """
+
+    if not np.isfinite(nu_threshold) or nu_threshold < 0.0:
+        raise ValueError("nu_threshold must be finite and non-negative")
+    selected = _resolve_branch(result, branch, occurrence)
+    nu = np.asarray(selected.nu_min, dtype=float)
+    crossings = np.flatnonzero(
+        (nu[:-1] > nu_threshold) & (nu[1:] <= nu_threshold)
+    )
+    if len(crossings) == 0:
+        return float("nan")
+    return float(selected.B_T[int(crossings[0]) + 1])
+
+
 def analyze_hysteresis(
     result: HysteresisResult,
     *,

@@ -10,6 +10,7 @@ from .analysis import (
     split_field_branches,
     switching_field_from_hysteresis,
     vortex_nucleation_field_from_hysteresis,
+    vortex_to_uniform_field_from_hysteresis,
 )
 from .analytical_formulas import (
     STONER_WOHLFARTH_ENSEMBLE_COERCIVE_RATIO,
@@ -104,5 +105,6 @@ __all__ = [
     "vortex_nucleation_field",
     "vortex_nucleation_field_from_hysteresis",
     "vortex_nucleation_radius",
+    "vortex_to_uniform_field_from_hysteresis",
     "vortex_hysteresis",
 ]
