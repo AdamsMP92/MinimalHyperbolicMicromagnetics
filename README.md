@@ -59,7 +59,7 @@ The micromagnetic Hamiltonian is
 ```math
 \mathcal{H}(\mathbf{m})
 =
-A\int_V \sum_{i,j\in\{x,y,z\}}\left(\partial_i m_j\right)^2 \,dV
+A \sum_{i,j\in\{x,y,z\}}\int_{V}\left(\partial_i m_j\right)^2 \,dV
 -
 K_u\int_V (\mathbf m\cdot \mathbf e_u)^2\,dV
 -
