@@ -10,11 +10,12 @@ import numpy as np
 import pandas as pd
 
 from .analytical_formulas import (
+    coercive_nucleation_radius,
+    remanent_nucleation_radius,
     stoner_wohlfarth_astroid,
     stoner_wohlfarth_coercive_field,
     stoner_wohlfarth_switching_field,
     vortex_nucleation_field,
-    vortex_nucleation_radius,
 )
 from .profiles import MU_0, compute_profiles
 
@@ -44,7 +45,18 @@ class ModelParameters:
 
     @property
     def nucleation_radius_m(self) -> float:
-        return float(vortex_nucleation_radius(self.Ku, self.Ms, self.A))
+        """Backward-compatible alias for ``remanent_nucleation_radius_m``."""
+        return self.remanent_nucleation_radius_m
+
+    @property
+    def remanent_nucleation_radius_m(self) -> float:
+        """Radius where the vortex first appears at zero field."""
+        return float(remanent_nucleation_radius(self.Ku, self.Ms, self.A))
+
+    @property
+    def coercive_nucleation_radius_m(self) -> float:
+        """Radius where coercivity first departs from coherent reversal."""
+        return float(coercive_nucleation_radius(self.Ms, self.A))
 
     def nucleation_field_T(self) -> float:
         return float(vortex_nucleation_field(self.Ku, self.Ms, self.A, self.R))

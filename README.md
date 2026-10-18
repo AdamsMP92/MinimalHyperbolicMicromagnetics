@@ -691,7 +691,13 @@ The closed formulas are available through:
 
 ```python
 from minimal_hyperbolic_micromagnetics import (
+    coercive_nucleation_radius,
+    coercive_radius_from_vortex_parameter,
+    coercive_vortex_parameter,
     exchange_length,
+    hyperbolic_vortex_coercive_field,
+    remanent_nucleation_radius,
+    remanent_vortex_parameter,
     vortex_nucleation_field,
     critical_anisotropy_for_zero_nucleation_field,
     vortex_nucleation_radius,
@@ -700,6 +706,15 @@ from minimal_hyperbolic_micromagnetics import (
     stoner_wohlfarth_coercive_field,
 )
 ```
+
+Here `remanent_vortex_parameter(R, ...)` evaluates the piecewise remanent
+profile $\nu_{\mathrm{rem}}(R)$.  The coercive-state counterpart
+`coercive_vortex_parameter(R, ...)` inverts the finite-profile angular
+spinodal between
+$R_{\mathrm{nuc}}^{\mathrm c}=\sqrt{15}\,\ell_{\mathrm{ex}}$ and
+$R_*^{\mathrm{rem}}$.  `hyperbolic_vortex_coercive_field(R, ...)` returns the
+corresponding positive magnitude $\mu_0H_{\mathrm c}(R)$ without requiring a
+discretized field sweep.
 
 ## Examples
 
