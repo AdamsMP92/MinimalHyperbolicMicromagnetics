@@ -17,6 +17,11 @@ coercive_field_example_output/
 sw_coercive_field_example_output/
 sw_ensemble_hysteresis_example_output/
 uniform_vortex_crossover_example_output/
+analytical_remanence_example_output/
+analytical_coercivity_example_output/
+hprime_hysteresis_example_output/
+profile_functions_example_output/
+vortex_field_profile_example_output/
 vortex_energy_profiles.csv
 vortex_energy_profiles.png
 model_hysteresis.csv

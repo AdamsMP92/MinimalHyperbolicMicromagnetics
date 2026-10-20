@@ -728,9 +728,86 @@ pixi run sw-astroide-example
 pixi run coercive-field
 pixi run sw-ensemble
 pixi run uniform-vortex-crossover
+pixi run analytical-remanence
+pixi run analytical-coercivity
+pixi run hprime-hysteresis
+pixi run profile-functions
+pixi run vortex-field-profile
 ```
 
 They generate CSV and PNG output in separate ignored output folders.
+
+`vortex-field-profile` creates an analytical counterpart of Fig. 1 in the
+2026 PRB minimal-model paper: a spherical vector field and the local
+cylindrical magnetization profiles at $\nu=4.443$ and $R=20$ nm. The field is
+evaluated on a 2 nm Cartesian cell-center grid inside the sphere; these are
+samples of the analytical ansatz, not simulation data. The right panel shows
+only the solid $m_{\phi'}=\tanh(\nu\rho'/R)$ and dashed
+$m_{z'}=\mathrm{sech}(\nu\rho'/R)$ curves, without scatter points. Labels
+use the body-frame notation of the accompanying Supplemental Material.
+The vertical range is $-0.05$ to $1.05$, leaving a small margin around the
+physical interval $[0,1]$. The radial
+component is exactly zero and is included in the CSV. The vector colors and
+colorbar both represent $m_{z'}$, matching the displayed component of the
+reference figure. The chosen $\nu$ reproduces its illustrated profile; the
+example does not compute a remanent equilibrium of the revised Hamiltonian.
+All panels, the colorbar, and labels use native paperfig helpers with LaTeX.
+The vector panel uses paperfig's fast off-screen PyVista renderer with at
+most two VTK threads and opens no interactive window. The combined PNG,
+field and profile CSVs, and settings/source/output checksums are saved in
+`vortex_field_profile_example_output/`. No external data or material
+parameters are required. These local magnetization profiles are distinct
+from the integrated energy functions in `profile-functions`.
+On macOS, off-screen VTK rendering still requires access to a native OpenGL
+context, which can be unavailable inside a restricted sandbox.
+
+`profile-functions` plots the dimensionless functions of Supplemental
+Eqs. (8)--(12) on $0\leq\nu\leq20$, with their original scaling. Its four
+adjacent paperfig/LaTeX panels show $g_{\mathrm{ex}}$, the two anisotropy
+profiles $g_{\mathrm{u}}^z$ and $g_{\mathrm{u}}^x$, the Zeeman moment $g_z^z$,
+and $g_{\mathrm{dem}}$, including the constant contribution in its SM
+definition. The material-independent profiles use the same 2000-point grid,
+360-point local quadrature, and magnetostatic degrees through 161 with
+648-point quadrature as the hysteresis examples. PNG, CSV, and source/settings
+metadata are saved in `profile_functions_example_output/`.
+
+`analytical-remanence` evaluates the analytical field-connected remanent
+branch of the revised $\mathcal H'$ model for $R=5$--$20$ nm, using the paper's
+parameters $A=10^{-11}$ J/m, $M_s=1.7\times10^6$ A/m, and
+$K_u=4.8\times10^4$ J/m$^3$. It creates a three-panel paperfig plot of
+$\nu_{\mathrm{rem}}(R)$, the longitudinal remanence
+$\left|\left\langle m_z\right\rangle_{V_R}\right|_{\mathrm{rem}}(R)$,
+and the orientation angle $\tau_{\mathrm{rem}}$ in degrees, together with a
+CSV table. The remaining symbols follow the Supplemental Material.
+The nucleation and reorientation radii
+are marked, and the discontinuity at reorientation is plotted with separate
+branches. At the reorientation radius itself the axial limiting state is
+used, matching the analytical API. Outputs are saved under
+`analytical_remanence_example_output/`. The figure uses paperfig's linear
+panel functions and LaTeX typography; a working LaTeX installation is required.
+
+`analytical-coercivity` uses the same material parameters and radius interval
+to plot the analytical limiting profile $\nu_{\mathrm{c}}(R)$ and the positive
+coercive-field magnitude $\mu_0H_{\mathrm{c}}(R)$ in mT. It marks
+$R_{\mathrm{nuc}}^{\mathrm{c}}$, where the coercivity departs from the uniform
+Stoner--Wohlfarth value, and $R_{\ast}^{\mathrm{rem}}$, where it vanishes.
+Above the latter radius, the limiting profile is the transverse remanent
+solution. The two-panel LaTeX/paperfig PNG and CSV table are saved under
+`analytical_coercivity_example_output/`; no hysteresis sweep is performed.
+
+`hprime-hysteresis` computes five complete $\mathcal H'$ loops sequentially
+at $R=8,9.3,10,12,20$ nm, with the same material parameters and
+`gux_factor=1`. Its 5262-point field sequence runs from +1 T to -1 T and back,
+with 0.1 mT steps inside ±71 mT, 1 mT steps out to ±595 mT, and 5 mT steps
+in the outer tails. The common 2000-point profile grid spans $0\leq\nu\leq20$;
+the local quadrature uses 360 points and the magnetostatic sum retains odd
+degrees through 161 with 648-point quadrature. The paperfig/LaTeX figure
+shows the full loops and a central-field enlargement. Loop and metadata
+CSVs, the profile table, the exact calculation-source snapshot, and separate
+calculation/plot manifests with configuration and checksums are
+saved in `hprime_hysteresis_example_output/`. Use
+`pixi run hprime-hysteresis --plot-only` to redraw the stored data after
+configuration and checksum validation.
 
 `sw-ensemble` computes the hysteresis of an isotropically oriented ensemble of
 uniaxial Stoner-Wohlfarth particles. It averages over the easy-axis angle with
