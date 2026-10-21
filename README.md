@@ -737,6 +737,25 @@ pixi run vortex-field-profile
 
 They generate CSV and PNG output in separate ignored output folders.
 
+The three examples corresponding to Supplemental Figs. 1, 3, and 4 also
+provide a compact layout for single-column main-text figures:
+
+```bash
+pixi run vortex-field-profile --layout compact_vertical
+pixi run analytical-remanence --layout compact_vertical
+pixi run analytical-coercivity --layout compact_vertical
+```
+
+The default `--layout horizontal` retains the Supplemental Material's panel
+arrangements and original PNG filenames. `compact_vertical` stacks the same
+panels from top to bottom in an 8.6 cm wide figure. Radius-dependent and
+local-profile panels are 6.6 cm wide and 3.3 cm high. The vector-field
+panel is square, 6.6 x 6.6 cm, using the full plot width while preserving
+the sphere's spatial proportions. Only the bottom radius panel carries
+the shared x-axis labels. Compact PNGs have the suffix `_compact_vertical.png`; the
+vector-field example also writes a separate metadata JSON for that layout.
+Both layouts evaluate the same analytical data and use paperfig with LaTeX.
+
 `vortex-field-profile` creates an analytical counterpart of Fig. 1 in the
 2026 PRB minimal-model paper: a spherical vector field and the local
 cylindrical magnetization profiles at $\nu=4.443$ and $R=20$ nm. The field is

@@ -9,10 +9,13 @@ profiles plotted by ``profile_functions_example.py``.
 Run ``pixi run vortex-field-profile``. The combined paperfig/LaTeX PNG, field
 and profile CSVs, and metadata are saved in
 ``vortex_field_profile_example_output/``. Rendering is off screen.
+Add ``--layout compact_vertical`` for a full-width square vector panel above
+a half-height profile panel, saved as a separate PNG and metadata file.
 """
 
 from __future__ import annotations
 
+import argparse
 from datetime import datetime, timezone
 import hashlib
 from importlib.metadata import version
@@ -128,16 +131,83 @@ def plot_field_and_profiles(field: pd.DataFrame, profiles: pd.DataFrame,
     plt.close(fig)
 
 
+def plot_field_and_profiles_compact_vertical(
+    field: pd.DataFrame, profiles: pd.DataFrame, output: Path,
+) -> None:
+    """Use the full panel width for the vortex above half-height profiles."""
+    vtkSMPTools.Initialize(2)
+    vtkMultiThreader.SetGlobalMaximumNumberOfThreads(2)
+    plt.rcParams.update({"legend.fontsize": 8})
+    width_cm, height_cm = 8.6, 12.1
+    left_cm, panel_width, panel_height = 1.55, 6.6, 3.3
+    field_size_cm = panel_width
+    field_bottom = 5.1
+    fig = pf.create_paper_figure(
+        width_cm=width_cm, height_cm=height_cm, use_latex=True,
+    )
+    xyz = field[["x_nm", "y_nm", "z_nm"]].to_numpy().T
+    magnetization = field[["mx", "my", "mz"]].to_numpy().T
+    pf.quiver3_advanced_panel_fast(
+        fig, *xyz, *magnetization, field.mz.to_numpy(),
+        Cmin=0.0, Cmax=1.0, cmap="RdBu", arrow_scale=0.13,
+        head_length=0.35, stick_radius=0.14, head_radius=0.24,
+        centering=False, subsample=1, view="custom", dpi=RENDER_DPI,
+        cam_pos=(3, -3, 2), focal_point=(0, 0, 0), up_direction=(0, 0, 1),
+        axes_width_cm=field_size_cm, axes_pos_x_cm=left_cm,
+        axes_pos_y_cm=field_bottom,
+    )
+    pf.add_colorbar_cm(
+        fig, pos_cm=(7.75, 7.575), size_cm=(0.16, 1.65),
+        vmin=0.0, vmax=1.0, cmap="RdBu", clabel=r"$m_{z'}$", ticks=[0.0, 1.0],
+    )
+    curves = [
+        {
+            "x": profiles.rho_over_R, "y": profiles.m_phi,
+            "label": r"$m_{\phi'}=\tanh(\nu\rho'/R)$", "color": "black",
+            "linewidth": 1.0, "linestyle": "-",
+        },
+        {
+            "x": profiles.rho_over_R, "y": profiles.m_z,
+            "label": r"$m_{z'}=\mathrm{sech}(\nu\rho'/R)$", "color": "black",
+            "linewidth": 1.0, "linestyle": "--",
+        },
+    ]
+    pf.plotLinLin_panel_core(
+        fig, curves, pos_cm=(left_cm, 1.0), size_cm=(panel_width, panel_height),
+        xlabel=r"$\rho'/R$", ylabel=r"$m_{\phi'},\,m_{z'}$", xlim=(-0.05, 1.05),
+        ylim=(-0.05, 1.05), xticks=[0.0, 0.25, 0.5, 0.75, 1.0],
+        yticks=[0.0, 0.25, 0.5, 0.75, 1.0],
+    )
+    pf.add_label_cm(fig, "(a)", x_cm=left_cm, y_cm=11.75, va="top")
+    pf.add_label_cm(fig, "(b)", x_cm=left_cm, y_cm=4.45, va="bottom")
+    # Coordinate labels use the same locations relative to the square
+    # vector render as in the original horizontal layout.
+    pf.add_label_cm(fig, r"$x'$", x_cm=left_cm + 1.6 * field_size_cm / 8.2,
+                    y_cm=field_bottom + field_size_cm / 8.2)
+    pf.add_label_cm(fig, r"$z'$", x_cm=left_cm + 0.35 * field_size_cm / 8.2,
+                    y_cm=field_bottom + 3.35 * field_size_cm / 8.2)
+    fig.savefig(output, dpi=FIGURE_DPI, facecolor="white")
+    plt.close(fig)
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--layout", choices=("horizontal", "compact_vertical"), default="horizontal",
+        help="Panel arrangement; compact_vertical writes a separate PNG and metadata.",
+    )
+    args = parser.parse_args()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     field = sample_field()
     profiles = sample_profiles()
     field_path = OUTPUT_DIR / "magnetization_field.csv"
     profiles_path = OUTPUT_DIR / "magnetization_profiles.csv"
-    figure_path = OUTPUT_DIR / "vortex_field_profile.png"
+    suffix = "_compact_vertical" if args.layout == "compact_vertical" else ""
+    figure_path = OUTPUT_DIR / f"vortex_field_profile{suffix}.png"
     field.to_csv(field_path, index=False)
     profiles.to_csv(profiles_path, index=False)
-    plot_field_and_profiles(field, profiles, figure_path)
+    plotter = plot_field_and_profiles_compact_vertical if suffix else plot_field_and_profiles
+    plotter(field, profiles, figure_path)
     paths = (Path(__file__), field_path, profiles_path, figure_path)
     metadata = {
         "reference": {"doi": "10.1103/8rkf-j2kn", "figure": 1},
@@ -149,12 +219,17 @@ def main() -> None:
         "profile_samples": len(profiles), "color_component": "mz",
         "camera_position": [3, -3, 2], "colormap": "RdBu",
         "use_latex": True, "off_screen": True,
+        "layout": args.layout,
+        "figure_size_cm": [8.6, 12.1] if suffix else [17.8, 8.2],
+        "panel_sizes_cm": {
+            "vector_field": [6.6, 6.6], "profiles": [6.6, 3.3],
+        } if suffix else None,
         "figure_dpi": FIGURE_DPI, "vector_render_dpi": RENDER_DPI,
         "completed_at_utc": datetime.now(timezone.utc).isoformat(),
         "versions": {name: version(name) for name in ("numpy", "paperfig", "pyvista")},
         "sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
     }
-    (OUTPUT_DIR / "vortex_field_profile_metadata.json").write_text(
+    (OUTPUT_DIR / f"vortex_field_profile{suffix}_metadata.json").write_text(
         json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8",
     )
     print(f"Saved {len(field)} analytical field samples to {field_path}")

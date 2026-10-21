@@ -8,10 +8,13 @@ limiting profile is the transverse remanent vortex. No field sweep is needed.
 
 Run with ``pixi run analytical-coercivity``. CSV data and a paperfig PNG are
 written to ``analytical_coercivity_example_output/`` in the repository root.
+Add ``--layout compact_vertical`` for stacked half-height panels in a
+single-column figure. The default horizontal PNG keeps its original name.
 """
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -76,12 +79,15 @@ def evaluate_coercivity() -> tuple[pd.DataFrame, float, float]:
     return data, r_nuc_c * 1.0e9, r_star * 1.0e9
 
 
-def plot_coercivity(
+def _plot_coercivity(
     data: pd.DataFrame, r_nuc_c_nm: float, r_star_nm: float, output: Path,
+    *, compact_vertical: bool,
 ) -> None:
-    """Create two adjacent paperfig linear panels with LaTeX typography."""
+    """Render the same analytical curves in either paperfig arrangement."""
+    width_cm, height_cm = (8.6, 9.25) if compact_vertical else (12.0, 6.1)
+    panel_width, panel_height = (6.6, 3.3) if compact_vertical else (4.15, 4.0)
     fig = pf.create_paper_figure(
-        width_cm=12.0, height_cm=6.1, use_latex=True,
+        width_cm=width_cm, height_cm=height_cm, use_latex=True,
     )
     radius = data["R_nm"].to_numpy()
     transverse = data["branch"].to_numpy() == "transverse_vortex"
@@ -98,7 +104,10 @@ def plot_coercivity(
         ),
     )
     for index, (column, ylabel, ylim, yticks) in enumerate(panels):
-        left_cm, bottom_cm = 1.25 + 5.8 * index, 1.1
+        if compact_vertical:
+            left_cm, bottom_cm = 1.55, 1.0 + (1 - index) * 3.95
+        else:
+            left_cm, bottom_cm = 1.25 + 5.8 * index, 1.1
         curves = [
             {"x": [r_nuc_c_nm, r_nuc_c_nm], "y": ylim, **NUCLEATION_STYLE},
             {"x": [r_star_nm, r_star_nm], "y": ylim, **REORIENTATION_STYLE},
@@ -123,44 +132,73 @@ def plot_coercivity(
 
         ax = pf.plotLinLin_panel_core(
             fig, curves,
-            pos_cm=(left_cm, bottom_cm), size_cm=(4.15, 4.0),
-            xlabel=r"$R$ [$\mathrm{nm}$]", ylabel=ylabel,
+            pos_cm=(left_cm, bottom_cm), size_cm=(panel_width, panel_height),
+            xlabel=r"$R$ [$\mathrm{nm}$]" if not compact_vertical or index == 1 else "",
+            ylabel=ylabel,
             xlim=(R_MIN_NM, R_MAX_NM), ylim=ylim,
             xticks=[5.0, 10.0, 15.0, 20.0], yticks=yticks,
+            xticklabels=["", "", "", ""] if compact_vertical and index == 0 else None,
         )
         if index == 0:
             # paperfig's panel API does not expose markerfacecolor.
             ax.lines[-1].set_markerfacecolor("white")
         pf.add_label_cm(
             fig, f"({chr(ord('a') + index)})",
-            x_cm=left_cm + 0.17, y_cm=bottom_cm + 3.52, va="top",
+            x_cm=left_cm + 0.17,
+            y_cm=bottom_cm + (panel_height - 0.4 if compact_vertical else 3.52),
+            va="top",
         )
 
+    legend_y = 8.80 if compact_vertical else 5.65
     for x_cm, label, style in (
         (
-            1.5,
+            1.35 if compact_vertical else 1.5,
             rf"$R_{{\mathrm{{nuc}}}}^{{\mathrm{{c}}}}={r_nuc_c_nm:.2f}\,\mathrm{{nm}}$",
             NUCLEATION_STYLE,
         ),
         (
-            7.0,
+            4.85 if compact_vertical else 7.0,
             rf"$R_{{\ast}}^{{\mathrm{{rem}}}}={r_star_nm:.2f}\,\mathrm{{nm}}$",
             REORIENTATION_STYLE,
         ),
     ):
-        pf.add_line_cm(fig, x_cm, 5.65, x_cm + 0.6, 5.65, **style)
-        pf.add_label_cm(fig, label, x_cm=x_cm + 0.8, y_cm=5.65, va="center")
+        key_width = 0.45 if compact_vertical else 0.6
+        text_offset = 0.6 if compact_vertical else 0.8
+        pf.add_line_cm(fig, x_cm, legend_y, x_cm + key_width, legend_y, **style)
+        pf.add_label_cm(fig, label, x_cm=x_cm + text_offset, y_cm=legend_y, va="center")
     fig.savefig(output, dpi=600)
     plt.close(fig)
 
 
+def plot_coercivity(
+    data: pd.DataFrame, r_nuc_c_nm: float, r_star_nm: float, output: Path,
+) -> None:
+    """Create the original horizontal two-panel SM figure."""
+    _plot_coercivity(data, r_nuc_c_nm, r_star_nm, output, compact_vertical=False)
+
+
+def plot_coercivity_compact_vertical(
+    data: pd.DataFrame, r_nuc_c_nm: float, r_star_nm: float, output: Path,
+) -> None:
+    """Stack two 6.6 x 3.3 cm panels in an 8.6 cm single-column figure."""
+    _plot_coercivity(data, r_nuc_c_nm, r_star_nm, output, compact_vertical=True)
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--layout", choices=("horizontal", "compact_vertical"), default="horizontal",
+        help="Panel arrangement; compact_vertical writes a separate PNG.",
+    )
+    args = parser.parse_args()
     data, r_nuc_c_nm, r_star_nm = evaluate_coercivity()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     csv_path = OUTPUT_DIR / "analytical_coercivity.csv"
-    png_path = OUTPUT_DIR / "analytical_coercivity.png"
+    suffix = "_compact_vertical" if args.layout == "compact_vertical" else ""
+    png_path = OUTPUT_DIR / f"analytical_coercivity{suffix}.png"
     data.to_csv(csv_path, index=False)
-    plot_coercivity(data, r_nuc_c_nm, r_star_nm, png_path)
+    plotter = plot_coercivity_compact_vertical if suffix else plot_coercivity
+    plotter(data, r_nuc_c_nm, r_star_nm, png_path)
     print(f"A = {A:g} J/m, Ms = {MS:g} A/m, Ku = {KU:g} J/m^3")
     print(f"R_nuc^c = {r_nuc_c_nm:.8f} nm; R_*^rem = {r_star_nm:.8f} nm")
     print(f"Uniform coercive-field magnitude = {2.0 * KU / MS * 1.0e3:.8f} mT")
