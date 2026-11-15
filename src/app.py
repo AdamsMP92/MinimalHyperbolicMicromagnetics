@@ -14,11 +14,15 @@ from shiny import App, Inputs, Outputs, Session, reactive, render, req, ui
 from minimal_hyperbolic_micromagnetics import split_field_branches
 from web_support import (
     WEB_PROFILE_SETTINGS,
+    ProfileBundle,
     WebCalculation,
     WebInputs,
+    build_profile_csv,
     build_result_archive,
     calculate_hysteresis,
+    effective_n_mu,
     get_profile_bundle,
+    profile_settings_from_web,
 )
 
 
@@ -129,6 +133,98 @@ def _millitesla(value: float) -> str:
     return _number(1.0e3 * value)
 
 
+def _profile_placeholder_figure():
+    figure, axis = plt.subplots(figsize=(8.0, 3.2))
+    figure.patch.set_alpha(0.0)
+    axis.set_facecolor("#fbfcfd")
+    axis.text(
+        0.5,
+        0.56,
+        "Prepare the universal profile table",
+        ha="center",
+        va="center",
+        color="#344054",
+        fontsize=13,
+        fontweight="semibold",
+        transform=axis.transAxes,
+    )
+    axis.text(
+        0.5,
+        0.42,
+        "Choose the grid in the left panel, then select Compute profiles.",
+        ha="center",
+        va="center",
+        color="#667085",
+        fontsize=9,
+        transform=axis.transAxes,
+    )
+    axis.set_xticks([])
+    axis.set_yticks([])
+    for spine in axis.spines.values():
+        spine.set_visible(False)
+    figure.tight_layout()
+    return figure
+
+
+def _profile_figure(profiles: ProfileBundle):
+    data = profiles.values
+    nu = data["nu"]
+    figure, axes = plt.subplots(2, 2, figsize=(8.2, 6.2), sharex=True)
+    figure.patch.set_alpha(0.0)
+    panels = (
+        (
+            axes[0, 0],
+            (("g_ex", "#d55e00", None),),
+            r"Exchange $g_{\mathrm{ex}}(\nu)$",
+        ),
+        (
+            axes[0, 1],
+            (
+                ("g_u_z", "#009e73", r"$g_{\mathrm{u}}^z$"),
+                ("g_u_x", "#0072b2", r"$g_{\mathrm{u}}^x$"),
+            ),
+            "Anisotropy profiles",
+        ),
+        (
+            axes[1, 0],
+            (("g_z_z", "#cc79a7", None),),
+            r"Zeeman moment $g_z^z(\nu)$",
+        ),
+        (
+            axes[1, 1],
+            (("g_dem", "#101828", None),),
+            r"Demagnetizing $g_{\mathrm{dem}}(\nu)$",
+        ),
+    )
+    for axis, curves, title in panels:
+        axis.set_facecolor("#fbfcfd")
+        for column, color, label in curves:
+            axis.plot(
+                nu,
+                data[column],
+                color=color,
+                linewidth=1.8,
+                label=label,
+            )
+        axis.set_title(title, loc="left", fontsize=10, fontweight="semibold")
+        axis.grid(color="#e7eaee", linewidth=0.7)
+        axis.set_xlim(profiles.settings.nu_min, profiles.settings.nu_max)
+        if any(label is not None for _, _, label in curves):
+            axis.legend(frameon=False, fontsize=8)
+    axes[1, 0].set_xlabel(r"Vortex coordinate $\nu$")
+    axes[1, 1].set_xlabel(r"Vortex coordinate $\nu$")
+    figure.suptitle(
+        "Universal hyperbolic-vortex profile functions",
+        x=0.08,
+        y=1.0,
+        ha="left",
+        fontsize=12,
+        fontweight="semibold",
+    )
+    figure.tight_layout()
+    return figure
+
+
 def _hysteresis_figure(calculation: WebCalculation):
     figure, axis = plt.subplots(figsize=(7.6, 5.0))
     figure.patch.set_alpha(0.0)
@@ -221,7 +317,72 @@ input_panel = ui.div(
         ),
         class_="preset-block",
     ),
-    _section_heading("01", "Material"),
+    _section_heading("01", "Profile table"),
+    ui.div(
+        _field(
+            "nu_max",
+            "Maximum vortex coordinate νmax",
+            WEB_PROFILE_SETTINGS.nu_max,
+            minimum=0.1,
+            maximum=100.0,
+            step=1.0,
+            note="Upper end of the universal profile table",
+        ),
+        _field(
+            "n_nu",
+            "Profile points Nν",
+            WEB_PROFILE_SETTINGS.n_nu,
+            minimum=32,
+            maximum=20_000,
+            step=100,
+            note="Uniform samples between 0 and νmax",
+        ),
+        class_="input-pair",
+    ),
+    ui.tags.details(
+        ui.tags.summary("Advanced numerical controls"),
+        ui.div(
+            ui.div(
+                _field(
+                    "n_quad",
+                    "Local quadrature Nquad",
+                    WEB_PROFILE_SETTINGS.n_quad,
+                    minimum=16,
+                    maximum=2_048,
+                    step=16,
+                    note="Gauss–Legendre points for local profiles",
+                ),
+                _field(
+                    "l_max_demag",
+                    "Demagnetizing cutoff lmax",
+                    WEB_PROFILE_SETTINGS.l_max_demag,
+                    minimum=1,
+                    maximum=501,
+                    step=2,
+                    note="Odd spherical-harmonic degree",
+                ),
+                class_="input-pair",
+            ),
+            _field(
+                "n_mu_demag",
+                "Demagnetizing quadrature Nμ",
+                0,
+                minimum=0,
+                maximum=4_096,
+                step=16,
+                note="0 selects max(360, 4(lmax + 1)) automatically",
+            ),
+            class_="advanced-settings-body",
+        ),
+        class_="advanced-settings",
+    ),
+    ui.input_action_button(
+        "compute_profiles",
+        "Compute profiles",
+        class_="btn-profile",
+    ),
+    ui.output_ui("profile_preparation_status"),
+    _section_heading("02", "Material"),
     ui.div(
         _field(
             "Ku_kJ_m3",
@@ -249,7 +410,7 @@ input_panel = ui.div(
         step=0.5,
         note="Converted to J/m internally",
     ),
-    _section_heading("02", "Geometry & orientation"),
+    _section_heading("03", "Geometry & orientation"),
     ui.div(
         _field(
             "radius_nm",
@@ -270,7 +431,7 @@ input_panel = ui.div(
         ),
         class_="input-pair",
     ),
-    _section_heading("03", "Model"),
+    _section_heading("04", "Model"),
     ui.input_checkbox(
         "use_h_double_prime",
         "Use H″ approximation (omit the transverse anisotropy profile)",
@@ -285,7 +446,7 @@ input_panel = ui.div(
         "H′ is the default. H″ uses the existing gux_factor = 0 switch.",
         class_="field-note checkbox-note",
     ),
-    _section_heading("04", "Field protocol"),
+    _section_heading("05", "Field protocol"),
     _field(
         "Bmax_T",
         "Maximum applied field Bmax [T]",
@@ -304,20 +465,11 @@ input_panel = ui.div(
         },
         selected="250",
     ),
-    ui.div(
-        ui.tags.strong("Fixed universal profile grid"),
-        ui.tags.span(
-            f"ν = 0…{WEB_PROFILE_SETTINGS.nu_max:g} · "
-            f"{WEB_PROFILE_SETTINGS.n_nu} points · "
-            f"quadrature {WEB_PROFILE_SETTINGS.n_quad} · "
-            f"lmax {WEB_PROFILE_SETTINGS.l_max_demag}"
-        ),
-        class_="profile-grid-note",
-    ),
     ui.input_action_button(
         "calculate",
         "Calculate hysteresis",
         class_="btn-calculate",
+        disabled=True,
     ),
     ui.div(
         ui.tags.span(class_="privacy-pulse"),
@@ -331,6 +483,20 @@ input_panel = ui.div(
 simulator_panel = ui.div(
     ui.div(input_panel, class_="simulator-sidebar"),
     ui.tags.main(
+        ui.div(
+            ui.div(
+                ui.div(
+                    ui.tags.span("STEP 1 · UNIVERSAL INPUT", class_="eyebrow"),
+                    ui.h3("Prepared profile functions"),
+                    class_="card-title-group",
+                ),
+                ui.output_ui("profile_chip"),
+                class_="visual-card-header",
+            ),
+            ui.output_plot("profile_plot", height="620px"),
+            ui.output_ui("profile_card_footer"),
+            class_="visual-card profile-card",
+        ),
         ui.output_ui("calculation_message"),
         ui.output_ui("summary_cards"),
         ui.div(
@@ -409,8 +575,9 @@ documentation_panel = ui.tags.article(
             ui.h3("Universal profiles"),
             ui.tags.p(
                 "The exchange, anisotropy, Zeeman-moment, and demagnetizing "
-                "profiles depend only on ν. The app evaluates the fixed 2000-point "
-                "production grid once and reuses it for every later material setup."
+                "profiles depend only on ν. Choose νmax and Nν, optionally refine "
+                "the quadratures, and prepare the table explicitly before running "
+                "a material-dependent hysteresis calculation."
             ),
             class_="docs-section",
         ),
@@ -561,6 +728,11 @@ app_ui = ui.page_bootstrap(
 
 
 def server(input: Inputs, output: Outputs, session: Session) -> None:
+    prepared_profiles = reactive.Value(None)
+    prepared_profile_cache_hit = reactive.Value(False)
+    profile_error = reactive.Value(None)
+    calculation_state = reactive.Value((None, None))
+
     @reactive.effect
     @reactive.event(input.preset)
     def _apply_preset() -> None:
@@ -580,69 +752,287 @@ def server(input: Inputs, output: Outputs, session: Session) -> None:
             stoner_wohlfarth=bool(input.stoner_wohlfarth()),
         )
 
-    @reactive.calc
-    @reactive.event(input.calculate, ignore_none=False)
-    def calculation() -> tuple[WebCalculation | None, str | None]:
+    def _collect_profile_settings():
+        return profile_settings_from_web(
+            nu_max=float(input.nu_max()),
+            n_nu=float(input.n_nu()),
+            n_quad=float(input.n_quad()),
+            l_max_demag=float(input.l_max_demag()),
+            n_mu_demag=float(input.n_mu_demag()),
+        )
+
+    def _profiles_are_current() -> bool:
+        profiles = prepared_profiles.get()
+        if profiles is None:
+            return False
         try:
+            return profiles.settings == _collect_profile_settings()
+        except (TypeError, ValueError):
+            return False
+
+    def _profiles() -> ProfileBundle:
+        profiles = prepared_profiles.get()
+        req(profiles is not None)
+        assert profiles is not None
+        return profiles
+
+    @reactive.effect
+    @reactive.event(input.compute_profiles)
+    def _prepare_profiles() -> None:
+        try:
+            settings = _collect_profile_settings()
             with ui.Progress(min=0, max=1) as progress:
                 progress.set(
-                    0.08,
+                    0.05,
                     message="Preparing universal profiles",
-                    detail="Computing or loading the fixed ν grid…",
+                    detail=(
+                        f"ν = 0…{settings.nu_max:g} with "
+                        f"{settings.n_nu:,} samples…"
+                    ),
                 )
-                profiles, cache_hit = get_profile_bundle()
+                profiles, cache_hit = get_profile_bundle(settings)
                 progress.set(
-                    0.52,
+                    1.0,
+                    message="Profile table ready",
+                    detail="The plot and profile download are available.",
+                )
+            prepared_profiles.set(profiles)
+            prepared_profile_cache_hit.set(cache_hit)
+            profile_error.set(None)
+            calculation_state.set((None, None))
+        except (ArithmeticError, TypeError, ValueError) as exc:
+            profile_error.set(str(exc))
+            calculation_state.set((None, None))
+        except Exception as exc:
+            profile_error.set(f"Profile calculation failed: {exc}")
+            calculation_state.set((None, None))
+
+    @reactive.effect
+    def _synchronize_profile_state() -> None:
+        # Reading these controls makes this effect invalidate immediately when
+        # the requested table changes.  A previous table remains visible for
+        # comparison, but cannot be used silently for a new hysteresis run.
+        try:
+            current = _profiles_are_current()
+        except Exception:
+            current = False
+        ui.update_action_button(
+            "calculate",
+            disabled=not current,
+            session=session,
+        )
+        if not current:
+            calculation_state.set((None, None))
+
+    @reactive.effect
+    @reactive.event(
+        input.nu_max,
+        input.n_nu,
+        input.n_quad,
+        input.l_max_demag,
+        input.n_mu_demag,
+        ignore_init=True,
+    )
+    def _clear_profile_error_after_edit() -> None:
+        profile_error.set(None)
+
+    @reactive.effect
+    @reactive.event(
+        input.Ku_kJ_m3,
+        input.Ms_MA_m,
+        input.A_pJ_m,
+        input.radius_nm,
+        input.beta_deg,
+        input.use_h_double_prime,
+        input.stoner_wohlfarth,
+        input.Bmax_T,
+        input.n_half,
+        ignore_init=True,
+    )
+    def _clear_calculation_after_model_edit() -> None:
+        calculation_state.set((None, None))
+
+    @reactive.effect
+    @reactive.event(input.calculate)
+    def _calculate_hysteresis() -> None:
+        try:
+            profiles = _profiles()
+            requested = _collect_profile_settings()
+            if profiles.settings != requested:
+                raise ValueError(
+                    "Profile settings changed. Compute the profile table again "
+                    "before calculating hysteresis."
+                )
+            with ui.Progress(min=0, max=1) as progress:
+                progress.set(
+                    0.05,
                     message="Following the field path",
                     detail="Continuing local minima through the major loop…",
                 )
                 result = calculate_hysteresis(
                     _collect_inputs(),
                     profiles,
-                    profile_cache_hit=cache_hit,
+                    profile_cache_hit=bool(prepared_profile_cache_hit.get()),
                 )
                 progress.set(
                     1.0,
                     message="Calculation complete",
                     detail="Loop, state path, and observables are ready.",
                 )
-            return result, None
+            calculation_state.set((result, None))
         except (ArithmeticError, ValueError) as exc:
-            return None, str(exc)
+            calculation_state.set((None, str(exc)))
         except Exception as exc:
-            return None, f"Numerical calculation failed: {exc}"
+            calculation_state.set((None, f"Numerical calculation failed: {exc}"))
 
     def _result() -> WebCalculation:
-        result, _ = calculation()
+        result, _ = calculation_state.get()
         req(result is not None)
         assert result is not None
         return result
 
     @output
     @render.ui
+    def profile_preparation_status() -> ui.Tag:
+        error = profile_error.get()
+        profiles = prepared_profiles.get()
+        if error is not None:
+            return ui.div(
+                ui.tags.strong("Profile settings need attention"),
+                ui.tags.span(error),
+                class_="profile-status profile-status-error",
+            )
+        if profiles is None:
+            return ui.div(
+                ui.tags.strong("No table prepared"),
+                ui.tags.span("Compute the profiles to unlock hysteresis."),
+                class_="profile-status profile-status-neutral",
+            )
+        if not _profiles_are_current():
+            return ui.div(
+                ui.tags.strong("Settings changed"),
+                ui.tags.span("Recompute before calculating hysteresis."),
+                class_="profile-status profile-status-warning",
+            )
+        source = (
+            "Loaded from this tab's cache"
+            if prepared_profile_cache_hit.get()
+            else f"Computed in {profiles.elapsed_s:.3f} s"
+        )
+        return ui.div(
+            ui.tags.strong("Profile table ready"),
+            ui.tags.span(source),
+            class_="profile-status profile-status-ready",
+        )
+
+    @output
+    @render.ui
+    def profile_chip() -> ui.Tag:
+        profiles = prepared_profiles.get()
+        if profiles is None:
+            return ui.tags.span("Not prepared", class_="method-chip profile-chip-muted")
+        if _profiles_are_current():
+            return ui.tags.span("Ready", class_="method-chip profile-chip-ready")
+        return ui.tags.span(
+            "Recompute required",
+            class_="method-chip profile-chip-warning",
+        )
+
+    @output
+    @render.plot
+    def profile_plot():
+        profiles = prepared_profiles.get()
+        if profiles is None:
+            return _profile_placeholder_figure()
+        return _profile_figure(profiles)
+
+    @output
+    @render.ui
+    def profile_card_footer() -> ui.Tag:
+        profiles = prepared_profiles.get()
+        if profiles is None:
+            return ui.div(
+                ui.tags.p(
+                    "The material-independent table is calculated locally and "
+                    "cached by its complete numerical configuration."
+                ),
+                class_="profile-card-footer profile-card-empty",
+            )
+        settings = profiles.settings
+        usage_note = (
+            "H″ is selected: gᵤˣ remains visible here but is omitted from the "
+            "hysteresis Hamiltonian."
+            if bool(input.use_h_double_prime())
+            else "H′ is selected: both anisotropy profiles enter the Hamiltonian."
+        )
+        return ui.div(
+            ui.div(
+                ui.tags.strong(
+                    f"ν = {settings.nu_min:g}…{settings.nu_max:g} · "
+                    f"Nν = {settings.n_nu:,}"
+                ),
+                ui.tags.span(
+                    f"Nquad = {settings.n_quad} · lmax = "
+                    f"{settings.l_max_demag} · Nμ = {effective_n_mu(settings)}"
+                ),
+                ui.tags.span(usage_note),
+                class_="profile-card-meta",
+            ),
+            ui.download_button(
+                "download_profiles",
+                "Download profile CSV",
+                class_="download-secondary",
+            ),
+            class_="profile-card-footer",
+        )
+
+    @output
+    @render.ui
     def calculation_message() -> ui.Tag | None:
-        result, error = calculation()
+        result, error = calculation_state.get()
         if error is not None:
             return ui.div(
                 ui.tags.strong("Check the model definition."),
                 ui.tags.span(error),
                 class_="calculation-message message-error",
             )
-        req(result is not None)
-        assert result is not None
-        profile_note = (
-            "The existing universal profile table was reused."
-            if result.profile_cache_hit
-            else (
-                "The universal profile table was computed in "
-                f"{result.profiles.elapsed_s:.2f} s and cached for this tab."
+        if result is None:
+            profiles_ready = _profiles_are_current()
+            detail = (
+                "The profile table is ready. Configure the particle and run the "
+                "field path."
+                if profiles_ready
+                else (
+                    "A current profile table is required before the field path "
+                    "can run."
+                )
             )
-        )
-        return ui.div(
+            return ui.div(
+                ui.tags.strong("Step 2 · Calculate hysteresis"),
+                ui.tags.span(detail),
+                class_="calculation-message message-neutral",
+            )
+        success = ui.div(
             ui.tags.strong(f"{result.model_label} major loop complete."),
-            ui.tags.span(profile_note),
+            ui.tags.span(
+                f"Used the prepared {result.profiles.settings.n_nu:,}-point "
+                "profile table."
+            ),
             class_="calculation-message message-success",
         )
+        if not result.profile_boundary_warning:
+            return success
+        warning = ui.div(
+            ui.tags.strong("Profile range reached."),
+            ui.tags.span(
+                f"The continued solution reached ν = "
+                f"{result.max_vortex_coordinate:.5g}, close to νmax = "
+                f"{result.profiles.settings.nu_max:g}. Increase νmax, recompute "
+                "the profiles, and repeat the loop."
+            ),
+            class_="calculation-message message-warning",
+        )
+        return ui.TagList(success, warning)
 
     @output
     @render.ui
@@ -721,10 +1111,16 @@ def server(input: Inputs, output: Outputs, session: Session) -> None:
     def diagnostics() -> ui.Tag:
         result = _result()
         settings = result.profiles.settings
+        status_class = "status-warning" if result.profile_boundary_warning else "status-ok"
+        status_text = (
+            "Profile range reached"
+            if result.profile_boundary_warning
+            else "Profile range sufficient"
+        )
         return ui.div(
             ui.div(
-                ui.tags.span(class_="status-light status-ok"),
-                ui.tags.strong("Profile table ready"),
+                ui.tags.span(class_=f"status-light {status_class}"),
+                ui.tags.strong(status_text),
                 class_="status-line",
             ),
             ui.tags.dl(
@@ -732,6 +1128,8 @@ def server(input: Inputs, output: Outputs, session: Session) -> None:
                 _status_item("Profile points", f"{settings.n_nu:,}"),
                 _status_item("Local quadrature", str(settings.n_quad)),
                 _status_item("Magnetostatic lmax", str(settings.l_max_demag)),
+                _status_item("Magnetostatic Nμ", str(effective_n_mu(settings))),
+                _status_item("Maximum selected ν", _number(result.max_vortex_coordinate)),
                 _status_item("Profile time", f"{result.profiles.elapsed_s:.3f} s"),
                 _status_item(
                     "Loop time",
@@ -740,6 +1138,16 @@ def server(input: Inputs, output: Outputs, session: Session) -> None:
                 class_="status-grid",
             ),
         )
+
+    @render.download_button(
+        filename=lambda: (
+            f"minimal_hyperbolic_profiles_numax{_profiles().settings.nu_max:g}_"
+            f"Nnu{_profiles().settings.n_nu}.csv"
+        ),
+        media_type="text/csv",
+    )
+    def download_profiles():
+        yield build_profile_csv(_profiles())
 
     @render.download_button(
         filename=lambda: (

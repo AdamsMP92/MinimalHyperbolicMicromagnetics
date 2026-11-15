@@ -29,9 +29,9 @@ from minimal_hyperbolic_micromagnetics import (
 )
 
 
-# The profiles are universal functions of the reduced vortex coordinate.  The
-# app computes this established production grid once per Python process (one
-# process per browser tab in Shinylive) and reuses it for subsequent runs.
+# The profiles are universal functions of the reduced vortex coordinate.  These
+# are the web form's defaults, not a fixed grid: visitors can prepare and cache
+# additional settings inside their browser tab.
 WEB_PROFILE_SETTINGS = ProfileComputation(
     nu_min=0.0,
     nu_max=20.0,
@@ -113,8 +113,108 @@ class WebCalculation:
             return "H″"
         return "H′"
 
+    @property
+    def max_vortex_coordinate(self) -> float:
+        """Largest finite vortex coordinate selected along the field path."""
+        values = np.asarray(self.result.nu_min, dtype=float)
+        finite = values[np.isfinite(values)]
+        return float(np.max(finite)) if finite.size else float("nan")
+
+    @property
+    def profile_boundary_warning(self) -> bool:
+        """Whether the continued solution reaches the tabulated upper edge."""
+        if self.inputs.stoner_wohlfarth:
+            return False
+        return profile_boundary_reached(
+            self.result.nu_min,
+            self.profiles.settings,
+        )
+
 
 _PROFILE_CACHE: dict[ProfileComputation, ProfileBundle] = {}
+
+
+def _integer_setting(
+    name: str,
+    value: int | float,
+    *,
+    minimum: int,
+    maximum: int,
+) -> int:
+    numeric = float(value)
+    if not np.isfinite(numeric) or not numeric.is_integer():
+        raise ValueError(f"{name} must be a whole number.")
+    integer = int(numeric)
+    if not minimum <= integer <= maximum:
+        raise ValueError(f"{name} must lie between {minimum} and {maximum}.")
+    return integer
+
+
+def profile_settings_from_web(
+    *,
+    nu_max: float,
+    n_nu: int | float,
+    n_quad: int | float,
+    l_max_demag: int | float,
+    n_mu_demag: int | float = 0,
+) -> ProfileComputation:
+    """Validate profile controls and create the existing package settings."""
+    nu_max = float(nu_max)
+    if not np.isfinite(nu_max) or not 0.1 <= nu_max <= 100.0:
+        raise ValueError("nu_max must lie between 0.1 and 100.")
+    n_nu = _integer_setting("N_nu", n_nu, minimum=32, maximum=20_000)
+    n_quad = _integer_setting("N_quad", n_quad, minimum=16, maximum=2_048)
+    l_max_demag = _integer_setting(
+        "l_max",
+        l_max_demag,
+        minimum=1,
+        maximum=501,
+    )
+    if l_max_demag % 2 == 0:
+        raise ValueError("l_max must be odd so the active cutoff is unambiguous.")
+    n_mu_demag = _integer_setting(
+        "N_mu",
+        n_mu_demag,
+        minimum=0,
+        maximum=4_096,
+    )
+    if n_mu_demag != 0 and n_mu_demag < l_max_demag + 1:
+        raise ValueError("N_mu must be 0 (automatic) or at least l_max + 1.")
+
+    return ProfileComputation(
+        nu_min=0.0,
+        nu_max=nu_max,
+        n_nu=n_nu,
+        n_quad=n_quad,
+        chunk_size=WEB_PROFILE_SETTINGS.chunk_size,
+        l_max_demag=l_max_demag,
+        n_mu_demag=None if n_mu_demag == 0 else n_mu_demag,
+    )
+
+
+def effective_n_mu(settings: ProfileComputation) -> int:
+    """Return the quadrature size used by the demagnetizing-profile sum."""
+    if settings.n_mu_demag is not None:
+        return int(settings.n_mu_demag)
+    effective_l_max = (
+        settings.l_max_demag
+        if settings.l_max_demag % 2 == 1
+        else settings.l_max_demag - 1
+    )
+    return max(360, 4 * (effective_l_max + 1))
+
+
+def profile_boundary_reached(
+    nu_values: np.ndarray,
+    settings: ProfileComputation,
+) -> bool:
+    """Detect solutions within two grid intervals of the upper profile edge."""
+    values = np.asarray(nu_values, dtype=float)
+    finite = values[np.isfinite(values)]
+    if not finite.size:
+        return False
+    spacing = (settings.nu_max - settings.nu_min) / max(settings.n_nu - 1, 1)
+    return bool(np.max(finite) >= settings.nu_max - 2.0 * spacing)
 
 
 def get_profile_bundle(
@@ -142,6 +242,11 @@ def get_profile_bundle(
 def clear_profile_cache() -> None:
     """Clear the process-local profile cache (primarily for focused tests)."""
     _PROFILE_CACHE.clear()
+
+
+def build_profile_csv(profiles: ProfileBundle) -> str:
+    """Serialize the complete prepared profile table for browser download."""
+    return pd.DataFrame(profiles.values).to_csv(index=False)
 
 
 def model_parameters(inputs: WebInputs) -> ModelParameters:
@@ -218,6 +323,10 @@ def build_result_archive(calculation: WebCalculation) -> bytes:
         "profile_settings": profile_settings,
         "profile_elapsed_s": calculation.profiles.elapsed_s,
         "profile_cache_hit": calculation.profile_cache_hit,
+        "max_vortex_coordinate": _finite_or_none(
+            calculation.max_vortex_coordinate
+        ),
+        "profile_boundary_warning": calculation.profile_boundary_warning,
         "hysteresis_elapsed_s": calculation.hysteresis_elapsed_s,
         "derived": {
             "anisotropy_field_T": calculation.parameters.anisotropy_field_T,

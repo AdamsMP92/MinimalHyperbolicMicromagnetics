@@ -3,15 +3,20 @@ import json
 from zipfile import ZipFile
 
 import numpy as np
+import pytest
 
 from minimal_hyperbolic_micromagnetics import ModelParameters, ProfileComputation
 from web_support import (
     WebInputs,
+    build_profile_csv,
     build_result_archive,
     calculate_hysteresis,
     clear_profile_cache,
+    effective_n_mu,
     get_profile_bundle,
     model_parameters,
+    profile_boundary_reached,
+    profile_settings_from_web,
 )
 
 
@@ -59,6 +64,52 @@ def test_profile_table_is_computed_once_for_identical_settings():
     assert second is first
     assert len(first.values["nu"]) == settings.n_nu
     assert all(not values.flags.writeable for values in first.values.values())
+
+
+def test_profile_controls_create_explicit_package_settings():
+    settings = profile_settings_from_web(
+        nu_max=24.0,
+        n_nu=2400,
+        n_quad=384,
+        l_max_demag=161,
+        n_mu_demag=0,
+    )
+
+    assert settings.nu_min == 0.0
+    assert settings.nu_max == 24.0
+    assert settings.n_nu == 2400
+    assert settings.n_quad == 384
+    assert settings.l_max_demag == 161
+    assert settings.n_mu_demag is None
+    assert effective_n_mu(settings) == 648
+
+    with pytest.raises(ValueError, match="whole number"):
+        profile_settings_from_web(
+            nu_max=20.0,
+            n_nu=2000.5,
+            n_quad=360,
+            l_max_demag=161,
+        )
+    with pytest.raises(ValueError, match="must be odd"):
+        profile_settings_from_web(
+            nu_max=20.0,
+            n_nu=2000,
+            n_quad=360,
+            l_max_demag=160,
+        )
+
+
+def test_profile_download_and_upper_boundary_diagnostic():
+    clear_profile_cache()
+    settings = _small_profile_settings()
+    profiles, _ = get_profile_bundle(settings)
+
+    csv_text = build_profile_csv(profiles)
+    assert csv_text.startswith("nu,g_ex,g_u_x,g_u_z,g_z_z")
+    assert len(csv_text.splitlines()) == settings.n_nu + 1
+
+    assert not profile_boundary_reached(np.array([0.0, 3.0]), settings)
+    assert profile_boundary_reached(np.array([0.0, 3.9, 4.0]), settings)
 
 
 def test_web_calculation_and_download_archive_use_existing_core():
