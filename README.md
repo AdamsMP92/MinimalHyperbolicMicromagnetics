@@ -571,6 +571,7 @@ With Pixi:
 ```bash
 pixi install
 pixi run test
+pixi run web
 ```
 
 For an editable Python install:
@@ -602,7 +603,7 @@ params = ModelParameters(
     A=1e-11,
     R=20e-9,
     beta_deg=0.0,
-    gux_factor=0.0,
+    gux_factor=1.0,
 )
 
 settings = HysteresisSettings(Bmax=1.0, n_half=250)
@@ -643,6 +644,38 @@ result.elapsed_s
 the requested CSV file and automatically adds a one-row `<stem>_metadata.csv`.
 The latter records the material and geometry, model switches, field and profile
 grid dimensions, and runtime.
+
+## Browser-native web interface
+
+The Shiny for Python interface exposes the same profile, hysteresis, and
+analysis functions used by the Python examples.  It uses the complete
+$\mathcal H'$ model by default.  A visible $\mathcal H''$ switch sets the
+existing `gux_factor` to zero and therefore omits the transverse anisotropy
+profile without changing the package API.
+
+The material-independent profile table is evaluated inside the application on
+the established grid $0\leq\nu\leq20$ with 2000 points, 360-point local
+quadrature, and magnetostatic degrees through 161.  The result is cached for
+the lifetime of the browser tab and reused for every subsequent material,
+radius, angle, and field protocol.
+
+Run the interface locally with:
+
+```bash
+pixi run web
+```
+
+Then open `http://127.0.0.1:8000`.  To create the static Shinylive bundle used
+by GitHub Pages:
+
+```bash
+pixi run export-site
+```
+
+The public application is deployed at
+<https://adamsmp92.github.io/MinimalHyperbolicMicromagnetics/>.  All numerical
+work runs locally in the visitor's browser; calculated curves and downloaded
+archives are not uploaded to a calculation server.
 
 ## Standard Hysteresis Analysis
 

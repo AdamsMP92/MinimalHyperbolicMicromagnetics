@@ -9,6 +9,7 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+site/
 compute_output/
 hysteresis_example_output/
 nucleation_field_example_output/

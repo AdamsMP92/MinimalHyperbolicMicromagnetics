@@ -19,6 +19,8 @@ profile-functions = "python examples/profile_functions_example.py"
 vortex-field-profile = "python examples/vortex_field_profile_example.py"
 test = "pytest test"
 sw-astroid = "python test/test_sw_astroid_minimal_model.py"
+web = "shiny run --host 127.0.0.1 --port 8000 src/app.py"
+export-site = "shinylive export src site"
 
 [dependencies]
 hatchling = ">=1.27,<2"
@@ -33,3 +35,5 @@ pyvista = ">=0.46,<0.47"
 [pypi-dependencies]
 minimal-hyperbolic-micromagnetics = { path = ".", editable = true }
 paperfig = { git = "https://github.com/AdamsMP92/paperfig.git" }
+shiny = ">=1.8,<2"
+shinylive = "==0.8.12"
