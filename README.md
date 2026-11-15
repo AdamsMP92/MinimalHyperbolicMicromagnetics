@@ -653,11 +653,16 @@ $\mathcal H'$ model by default.  A visible $\mathcal H''$ switch sets the
 existing `gux_factor` to zero and therefore omits the transverse anisotropy
 profile without changing the package API.
 
-The material-independent profile table is evaluated inside the application on
-the established grid $0\leq\nu\leq20$ with 2000 points, 360-point local
-quadrature, and magnetostatic degrees through 161.  The result is cached for
-the lifetime of the browser tab and reused for every subsequent material,
-radius, angle, and field protocol.
+The material-independent profile table is evaluated explicitly inside the
+application before a hysteresis run.  The interface exposes $\nu_{\max}$ and
+$N_\nu$, with advanced controls for the local quadrature, magnetostatic cutoff,
+and magnetostatic quadrature.  The established grid $0\leq\nu\leq20$ with 2000
+points, 360-point local quadrature, and magnetostatic degrees through 161
+remains the default.  Every completed configuration is cached for the lifetime
+of the browser tab.  The app plots $g_{\mathrm{ex}}$, $g_u^z$, $g_u^x$,
+$g_z^z$, and $g_{\mathrm{dem}}$ before enabling the material-dependent
+hysteresis calculation, and warns if the continued solution reaches the upper
+profile boundary.
 
 Run the interface locally with:
 
