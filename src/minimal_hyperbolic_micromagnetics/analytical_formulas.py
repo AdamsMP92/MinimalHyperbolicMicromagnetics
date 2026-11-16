@@ -649,11 +649,12 @@ def coercive_field_from_vortex_parameter(
     *,
     n_quad=360,
 ):
-    """Return the positive coercive-field magnitude ``B_c(nu)`` in tesla.
+    """Return the applied-field magnitude at the axial angular spinodal.
 
-    The corresponding spinodal on the descending branch has the signed field
-    ``-B_c``.  The expression follows from vanishing angular curvature of the
-    axial hyperbolic vortex.
+    The input is the vortex-profile parameter ``nu``; the returned value is
+    nonnegative and in tesla. The signed descending spinodal field ``B_0`` is
+    minus this magnitude. Evaluating it at the selected ``nu_c(R)`` on the
+    nonuniform axial coercive branch gives ``|B_c(R)|``.
     """
     if Ku < 0.0:
         raise ValueError("Ku must be non-negative.")
@@ -975,7 +976,7 @@ def hyperbolic_vortex_coercive_field(
 ):
     """Return the analytic positive coercive-field magnitude in tesla.
 
-    This is the radius-dependent ``mu0 H_c`` of the reduced hyperbolic-vortex
+    This is the radius-dependent ``|B_c(R)|`` of the reduced hyperbolic-vortex
     model.  It equals the Stoner--Wohlfarth value below ``R_nuc^c``, follows
     the finite-profile angular spinodal up to ``R_*^rem``, and vanishes for
     the reversible transverse branch above that radius.

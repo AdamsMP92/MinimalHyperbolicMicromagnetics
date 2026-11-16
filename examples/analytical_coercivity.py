@@ -1,7 +1,7 @@
 """Plot the analytical radius-dependent coercivity of the revised H' model.
 
 The two panels show nu_c(R) and the positive coercive-field magnitude
-mu0 H_c(R), following the Supplemental Material's coercive-state solution.
+|B_c(R)|, following the Supplemental Material's coercive-state solution.
 Below R_nuc^c the state is uniform. The axial coercive spinodal determines
 the intermediate branch. Above R_*^rem the coercivity vanishes, while the
 limiting profile is the transverse remanent vortex. No field sweep is needed.
@@ -99,7 +99,7 @@ def _plot_coercivity(
             np.arange(np.floor(1.1 * nu_max) + 1),
         ),
         (
-            "mu0_Hc_mT", r"$\mu_0H_{\mathrm{c}}(R)$ [$\mathrm{mT}$]",
+            "mu0_Hc_mT", r"$|B_{\mathrm{c}}(R)|$ [$\mathrm{mT}$]",
             (-0.05 * field_max, 1.1 * field_max), np.arange(0.0, 61.0, 20.0),
         ),
     )

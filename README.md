@@ -751,7 +751,7 @@ profile $\nu_{\mathrm{rem}}(R)$.  The coercive-state counterpart
 spinodal between
 $R_{\mathrm{nuc}}^{\mathrm c}=\sqrt{15}\,\ell_{\mathrm{ex}}$ and
 $R_*^{\mathrm{rem}}$.  `hyperbolic_vortex_coercive_field(R, ...)` returns the
-corresponding positive magnitude $\mu_0H_{\mathrm c}(R)$ without requiring a
+corresponding positive magnitude $|B_{\mathrm c}(R)|$ without requiring a
 discretized field sweep.
 
 ## Examples
@@ -769,6 +769,7 @@ pixi run uniform-vortex-crossover
 pixi run analytical-remanence
 pixi run analytical-coercivity
 pixi run hprime-hysteresis
+pixi run hprime-hysteresis-three-radii
 pixi run profile-functions
 pixi run vortex-field-profile
 ```
@@ -845,7 +846,7 @@ panel functions and LaTeX typography; a working LaTeX installation is required.
 
 `analytical-coercivity` uses the same material parameters and radius interval
 to plot the analytical limiting profile $\nu_{\mathrm{c}}(R)$ and the positive
-coercive-field magnitude $\mu_0H_{\mathrm{c}}(R)$ in mT. It marks
+coercive-field magnitude $|B_{\mathrm{c}}(R)|$ in mT. It marks
 $R_{\mathrm{nuc}}^{\mathrm{c}}$, where the coercivity departs from the uniform
 Stoner--Wohlfarth value, and $R_{\ast}^{\mathrm{rem}}$, where it vanishes.
 Above the latter radius, the limiting profile is the transverse remanent
@@ -865,6 +866,17 @@ calculation/plot manifests with configuration and checksums are
 saved in `hprime_hysteresis_example_output/`. Use
 `pixi run hprime-hysteresis --plot-only` to redraw the stored data after
 configuration and checksum validation.
+
+`hprime-hysteresis-three-radii` computes three complete $\mathcal H'$ loops
+at $R=8,10,14$ nm, using the same paper material parameters, profile table
+settings, and +1 T -> -1 T -> +1 T field protocol as `hprime-hysteresis`.
+Its single paperfig/LaTeX panel shows $\langle m_z\rangle_{V_R}$ against
+$B_0$ between -0.5 and +0.5 T. Both the 8.6 cm figure canvas and the
+6.6 cm plotting axes are square. CSV data, metadata, the common profiles,
+loop summaries, source snapshot, provenance manifests, and
+`hprime_hysteresis_three_radii.png` are saved in
+`hprime_hysteresis_three_radii_example_output/`. Use
+`pixi run hprime-hysteresis-three-radii --plot-only` to redraw verified data.
 
 `sw-ensemble` computes the hysteresis of an isotropically oriented ensemble of
 uniaxial Stoner-Wohlfarth particles. It averages over the easy-axis angle with
