@@ -12,6 +12,9 @@ license = { file = "LICENSE" }
 authors = [
   { name = "Michael P. Adams" },
 ]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+]
 dependencies = [
   "numpy",
   "pandas",

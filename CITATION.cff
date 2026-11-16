@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this software in research, please cite the version you used and the associated article."
+type: software
+title: "Minimal Hyperbolic Micromagnetics"
+version: 0.1.0
+authors:
+  - family-names: Adams
+    given-names: Michael P.
+    orcid: "https://orcid.org/0000-0001-9269-8087"
+abstract: >-
+  Minimal Hyperbolic Micromagnetics is a reduced Python model for vortex
+  nucleation and reversal in spherical magnetic nanoparticles. It provides
+  optimized hyperbolic-vortex profiles, quasistatic hysteresis calculations,
+  and Stoner-Wohlfarth reference calculations through a reusable package and
+  browser-native interface.
+keywords:
+  - micromagnetics
+  - magnetic nanoparticles
+  - magnetic vortex
+  - hysteresis
+  - Stoner-Wohlfarth model
+  - scientific software
+license: MIT
+repository-code: "https://github.com/AdamsMP92/MinimalHyperbolicMicromagnetics"
+url: "https://adamsmp92.github.io/MinimalHyperbolicMicromagnetics/"
+preferred-citation:
+  type: article
+  title: "Minimal model for vortex nucleation and reversal in spherical magnetic nanoparticles"
+  authors:
+    - family-names: Adams
+      given-names: Michael P.
+      orcid: "https://orcid.org/0000-0001-9269-8087"
+    - family-names: Michels
+      given-names: Andreas
+  journal: "Physical Review B"
+  volume: 113
+  start: 224406
+  year: 2026
+  doi: "10.1103/8rkf-j2kn"
